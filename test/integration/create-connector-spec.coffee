@@ -71,7 +71,10 @@ describe 'Create Connector', ->
             stopped: false
           }
         }
-        .reply 201
+        .reply 201, {
+          device: 'response'
+          fake: true
+        }
 
       options =
         uri: '/create'
@@ -92,6 +95,12 @@ describe 'Create Connector', ->
 
     it 'should return a 201', ->
       expect(@response.statusCode).to.equal 201, @body
+
+    it 'should have the device creation response', ->
+      expect(@body).to.deep.equal {
+        device: 'response'
+        fake: true
+      }
 
     it 'should auth the request with meshblu', ->
       @authDevice.done()
