@@ -72,9 +72,39 @@ describe 'Create Connector', ->
           }
         }
         .reply 201, {
+          uuid: 'some-device-uuid'
           device: 'response'
           fake: true
         }
+
+      @createStatusDevice = @meshblu
+        .post '/devices'
+        .set 'Authorization', "Basic #{userAuth}"
+        .send {
+          type: 'connector-status-device',
+          owner: 'some-device-uuid',
+          discoverWhitelist: ['some-device-uuid', 'some-owner']
+          configureWhitelist: ['some-device-uuid', 'some-owner']
+          sendWhitelist: ['some-device-uuid', 'some-owner']
+          receiveWhitelist: ['some-device-uuid', 'some-owner']
+        }
+        .reply 201, {
+          uuid: 'some-status-device-uuid'
+        }
+
+      @updateDevice = @meshblu
+        .put '/v2/devices/some-device-uuid'
+        .set 'Authorization', "Basic #{userAuth}"
+        .send {
+          $set:
+            statusDevice: 'some-status-device-uuid'
+          $addToSet:
+            'octoblu.links':
+              url: 'https://connector-factory.octoblu.com/connectors/configure/some-device-uuid'
+              title: 'View in Connector Factory'
+        }
+        .reply 204
+
 
       options =
         uri: '/create'
@@ -98,6 +128,7 @@ describe 'Create Connector', ->
 
     it 'should have the device creation response', ->
       expect(@body).to.deep.equal {
+        uuid: 'some-device-uuid'
         device: 'response'
         fake: true
       }
@@ -110,3 +141,9 @@ describe 'Create Connector', ->
 
     it 'should create the device in meshblu', ->
       @createDevice.done()
+
+    it 'should create the status device in meshblu', ->
+      @createStatusDevice.done()
+
+    it 'should update the device with the statusDevice uuid', ->
+      @updateDevice.done()

@@ -8,6 +8,5 @@ class Router
     meshbluConnectorController = new MeshbluConnectorController {@meshbluConnectorService}
 
     app.post '/create', meshbluConnectorController.create
-    # e.g. app.put '/resource/:id', someController.update
 
 module.exports = Router
