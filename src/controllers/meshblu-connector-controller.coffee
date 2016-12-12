@@ -1,9 +1,11 @@
 class MeshbluConnectorController
   constructor: ({@meshbluConnectorService}) ->
-    throw new Error 'Missing meshbluConnectorService' unless @meshbluConnectorService?
+    throw new Error 'MeshbluConnectorController: requires meshbluConnectorService' unless @meshbluConnectorService?
 
   create: (request, response) =>
-    @meshbluConnectorService.create {}, (error) =>
+    { name, connector, type, githubSlug, version, owner } = request.body
+    { meshbluAuth } = request
+    @meshbluConnectorService.create { name, connector, type, githubSlug, version, owner, meshbluAuth }, (error) =>
       return response.sendError(error) if error?
       response.sendStatus(201)
 
