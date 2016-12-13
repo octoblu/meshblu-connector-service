@@ -7,12 +7,15 @@ class UpgradeConnectorService
 
   do: ({ body, uuid, meshbluAuth }, callback) =>
     validationError = @_validateBody body
-    return callback(validationError) if validationError?
-    { githubSlug, version, owner } = body
+    return callback validationError if validationError?
     meshbluHttp = new MeshbluHttp meshbluAuth
-    @schemaService.get { githubSlug, version }, (error, schemas) =>
+    @_getConnectorDevice { uuid, meshbluHttp }, (error, device) =>
       return callback error if error?
-      @_getConnectorDevice { uuid, meshbluHttp }, (error, device) =>
+      { githubSlug, version, owner } = body
+      body = @_createUpdateBody { device, body }
+      validationError = @_validateUpdateBody body
+      return callback validationError if validationError?
+      @schemaService.get { githubSlug, version }, (error, schemas) =>
         return callback error if error?
         @_createStatusDevice { device, owner, meshbluHttp }, (error, statusDevice) =>
           return callback error if error?
@@ -23,7 +26,7 @@ class UpgradeConnectorService
 
   _createStatusDevice: ({ owner, device, meshbluHttp }, callback) =>
     { uuid, statusDevice } = device
-    return callback null if statusDevice?
+    return callback null, { uuid: statusDevice } if statusDevice?
     properties = {
       type: 'connector-status-device',
       owner: uuid,
@@ -35,22 +38,36 @@ class UpgradeConnectorService
     meshbluHttp.register properties, callback
 
   _updateDevice: ({ uuid, statusDevice, body, schemas, meshbluHttp }, callback) =>
-    query = {
-      type: body.type
-      connector: body.connector
-      'connectorMetadata.version': body.version
-      'connectorMetadata.githubSlug': body.githubSlug
-      schemas: schemas
+    { githubSlug, name, version, connector, type, registryItem } = body
+    properties = {
+      type
+      connector
+      'connectorMetadata.version': version
+      'connectorMetadata.githubSlug': githubSlug
+      schemas
     }
-    _.set query, 'statusDevice', statusDevice.uuid if statusDevice?.uuid?
-    meshbluHttp.update uuid, query, callback
+    _.set properties, 'name', name if name?
+    _.set properties, 'statusDevice', statusDevice.uuid if statusDevice?.uuid?
+    properties['octoblu.registryItem'] = registryItem if registryItem?
+    properties['octoblu.registryItem'] = { githubSlug } unless registryItem?
+    meshbluHttp.update uuid, properties, callback
+
+  _createUpdateBody: ({ body, device }) =>
+    return _.defaults body, {
+      name: _.get(device, 'name')
+      connector: _.get(device, 'connector')
+      type: _.get(device, 'type')
+      githubSlug: _.get(device, 'connectorMetadata.githubSlug')
+    }
 
   _validateBody: (body) =>
     return @_createError 'Upgrade Connector: requires a post body', 422 unless body?
-    return @_createError 'Upgrade Connector: requires githubSlug in post body', 422 unless body.githubSlug?
     return @_createError 'Upgrade Connector: requires owner in post body', 422 unless body.owner?
     return @_createError 'Upgrade Connector: requires version in post body', 422 unless body.version?
-    return @_createError 'Upgrade Connector: requires name in post body', 422 unless body.name?
+    return null
+
+  _validateUpdateBody: (body) =>
+    return @_createError 'Upgrade Connector: requires githubSlug in post body', 422 unless body.githubSlug?
     return @_createError 'Upgrade Connector: requires connector in post body', 422 unless body.connector?
     return @_createError 'Upgrade Connector: requires type in post body', 422 unless body.type?
     return null

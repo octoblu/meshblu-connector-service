@@ -85,6 +85,102 @@ describe 'Upgrade Connector', ->
             'connectorMetadata.githubSlug': 'some-owner/some-meshblu-connector',
             schemas: {
               some: 'schema'
+            },
+            'octoblu.registryItem': {
+              githubSlug: 'some-owner/some-meshblu-connector'
+            }
+          }
+          .reply 204
+
+        options =
+          uri: '/upgrade/some-device-uuid'
+          baseUrl: "http://localhost:#{@serverPort}"
+          auth:
+            username: 'some-uuid'
+            password: 'some-token'
+          json:
+            type: 'some-type',
+            owner: 'some-owner'
+            connector: 'some-meshblu-connector',
+            version: 'v2.0.0'
+            githubSlug: 'some-owner/some-meshblu-connector'
+
+        request.put options, (error, @response, @body) =>
+          done error
+
+      it 'should return a 204', ->
+        expect(@response.statusCode).to.equal 204, @body
+
+      it 'should auth the request with meshblu', ->
+        @authDevice.done()
+
+      it 'should get the schema', ->
+        @getSchemas.done()
+
+      it 'should get the device in meshblu', ->
+        @getDevice.done()
+
+      it 'should create the status device in meshblu', ->
+        @createStatusDevice.done()
+
+      it 'should update the device with the statusDevice uuid', ->
+        @updateDevice.done()
+
+    describe 'when it has a statusDevice', ->
+      beforeEach (done) ->
+        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
+
+        @authDevice = @meshblu
+          .post '/authenticate'
+          .set 'Authorization', "Basic #{userAuth}"
+          .reply 204
+
+        @getDevice = @meshblu
+          .get '/v2/devices/some-device-uuid'
+          .set 'Authorization', "Basic #{userAuth}"
+          .reply 200, {
+            uuid: 'some-device-uuid'
+            statusDevice: 'some-status-device-uuid'
+          }
+
+        @getSchemas = @fileDownloadService
+          .get '/github-release/some-owner/some-meshblu-connector/v2.0.0/schemas.json'
+          .reply 200, {
+            schemas: {
+              some: 'schema'
+            }
+          }
+
+        @createStatusDevice = @meshblu
+          .post '/devices'
+          .set 'Authorization', "Basic #{userAuth}"
+          .send {
+            type: 'connector-status-device',
+            owner: 'some-device-uuid',
+            discoverWhitelist: ['some-device-uuid', 'some-owner']
+            configureWhitelist: ['some-device-uuid', 'some-owner']
+            sendWhitelist: ['some-device-uuid', 'some-owner']
+            receiveWhitelist: ['some-device-uuid', 'some-owner']
+          }
+          .reply 201, {
+            uuid: 'some-status-device-uuid'
+          }
+
+        @updateDevice = @meshblu
+          .patch '/v2/devices/some-device-uuid'
+          .set 'Authorization', "Basic #{userAuth}"
+          .send {
+            name: 'some-name'
+            type: 'some-type'
+            connector: 'some-meshblu-connector'
+            statusDevice: 'some-status-device-uuid'
+            'connectorMetadata.version': 'v2.0.0',
+            'connectorMetadata.githubSlug': 'some-owner/some-meshblu-connector',
+            schemas: {
+              some: 'schema'
+            },
+            'octoblu.registryItem': {
+              githubSlug: 'some-owner/some-meshblu-connector'
             }
           }
           .reply 204
@@ -118,8 +214,8 @@ describe 'Upgrade Connector', ->
       it 'should get the device in meshblu', ->
         @getDevice.done()
 
-      it 'should create the status device in meshblu', ->
-        @createStatusDevice.done()
+      it 'should not create the status device in meshblu', ->
+        expect(@createStatusDevice.isDone).to.be.false
 
       it 'should update the device with the statusDevice uuid', ->
         @updateDevice.done()
@@ -133,6 +229,14 @@ describe 'Upgrade Connector', ->
             .post '/authenticate'
             .set 'Authorization', "Basic #{userAuth}"
             .reply 204
+
+          @getDevice = @meshblu
+            .get '/v2/devices/some-device-uuid'
+            .set 'Authorization', "Basic #{userAuth}"
+            .reply 200, {
+              uuid: 'some-device-uuid'
+              statusDevice: 'some-status-device-uuid'
+            }
 
           options =
             uri: '/upgrade/some-device-uuid'
@@ -164,6 +268,14 @@ describe 'Upgrade Connector', ->
             .post '/authenticate'
             .set 'Authorization', "Basic #{userAuth}"
             .reply 204
+
+          @getDevice = @meshblu
+            .get '/v2/devices/some-device-uuid'
+            .set 'Authorization', "Basic #{userAuth}"
+            .reply 200, {
+              uuid: 'some-device-uuid'
+              statusDevice: 'some-status-device-uuid'
+            }
 
           options =
             uri: '/upgrade/some-device-uuid'
@@ -218,37 +330,6 @@ describe 'Upgrade Connector', ->
         it 'should return the error in the body', ->
           expect(@body.error).to.equal 'Upgrade Connector: requires version in post body'
 
-      describe 'when missing the name', ->
-        beforeEach (done) ->
-          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-          @authDevice = @meshblu
-            .post '/authenticate'
-            .set 'Authorization', "Basic #{userAuth}"
-            .reply 204
-
-          options =
-            uri: '/upgrade/some-device-uuid'
-            baseUrl: "http://localhost:#{@serverPort}"
-            auth:
-              username: 'some-uuid'
-              password: 'some-token'
-            json:
-              type: '...'
-              githubSlug: '...'
-              owner: '...'
-              version: '...'
-              connector: '...'
-
-          request.put options, (error, @response, @body) =>
-            done error
-
-        it 'should return a 422', ->
-          expect(@response.statusCode).to.equal 422
-
-        it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Upgrade Connector: requires name in post body'
-
       describe 'when missing the connector', ->
         beforeEach (done) ->
           userAuth = new Buffer('some-uuid:some-token').toString 'base64'
@@ -257,6 +338,14 @@ describe 'Upgrade Connector', ->
             .post '/authenticate'
             .set 'Authorization', "Basic #{userAuth}"
             .reply 204
+
+          @getDevice = @meshblu
+            .get '/v2/devices/some-device-uuid'
+            .set 'Authorization', "Basic #{userAuth}"
+            .reply 200, {
+              uuid: 'some-device-uuid'
+              statusDevice: 'some-status-device-uuid'
+            }
 
           options =
             uri: '/upgrade/some-device-uuid'
@@ -289,6 +378,14 @@ describe 'Upgrade Connector', ->
             .set 'Authorization', "Basic #{userAuth}"
             .reply 204
 
+          @getDevice = @meshblu
+            .get '/v2/devices/some-device-uuid'
+            .set 'Authorization', "Basic #{userAuth}"
+            .reply 200, {
+              uuid: 'some-device-uuid'
+              statusDevice: 'some-status-device-uuid'
+            }
+            
           options =
             uri: '/upgrade/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"

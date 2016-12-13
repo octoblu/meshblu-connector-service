@@ -6,6 +6,7 @@ class MeshbluConnectorController
   create: (request, response) =>
     { meshbluAuth, body } = request
     @createConnectorService.do { body, meshbluAuth }, (error, device) =>
+      console.error(error) if error?.code >= 500
       return response.sendError(error) if error?
       response.status(201).send(device)
 
@@ -13,6 +14,7 @@ class MeshbluConnectorController
     { meshbluAuth, body } = request
     { uuid } = request.params
     @upgradeConnectorService.do { body, meshbluAuth, uuid }, (error, device) =>
+      console.error(error) if error?.code >= 500
       return response.sendError(error) if error?
       response.sendStatus(204)
 

@@ -63,14 +63,15 @@ describe 'Create Connector', ->
             configureWhitelist: ['some-owner']
             sendWhitelist: ['some-owner']
             receiveWhitelist: ['some-owner']
-            schemas: {
+            schemas:
               some: 'schema'
-            }
-            connectorMetadata: {
+            octoblu:
+              registryItem:
+                githubSlug: 'some-owner/some-meshblu-connector'
+            connectorMetadata:
               version: 'v1.0.0',
               githubSlug: 'some-owner/some-meshblu-connector',
               stopped: false
-            }
           }
           .reply 201, {
             uuid: 'some-device-uuid'
@@ -253,37 +254,6 @@ describe 'Create Connector', ->
 
         it 'should return the error in the body', ->
           expect(@body.error).to.equal 'Create Connector: requires version in post body'
-
-      describe 'when missing the name', ->
-        beforeEach (done) ->
-          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-          @authDevice = @meshblu
-            .post '/authenticate'
-            .set 'Authorization', "Basic #{userAuth}"
-            .reply 204
-
-          options =
-            uri: '/create'
-            baseUrl: "http://localhost:#{@serverPort}"
-            auth:
-              username: 'some-uuid'
-              password: 'some-token'
-            json:
-              type: '...'
-              githubSlug: '...'
-              owner: '...'
-              version: '...'
-              connector: '...'
-
-          request.post options, (error, @response, @body) =>
-            done error
-
-        it 'should return a 422', ->
-          expect(@response.statusCode).to.equal 422
-
-        it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Create Connector: requires name in post body'
 
       describe 'when missing the connector', ->
         beforeEach (done) ->

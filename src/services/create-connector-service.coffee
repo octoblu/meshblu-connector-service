@@ -26,9 +26,8 @@ class CreateConnectorService
 
   _createConnectorDevice: ({ body, meshbluHttp, schemas }, callback) =>
     { name, connector, type, githubSlug, version } = body
-    { regsitryItem, owner } = body
+    { registryItem, owner } = body
     properties = {
-      name,
       type,
       connector,
       owner,
@@ -43,7 +42,9 @@ class CreateConnectorService
         stopped: false
       }
     }
-    _.set properties, 'octoblu.registryItem', registryItem if registryItem?
+    _.set properties, 'name', name
+    _.set properties, 'octoblu.registryItem', registryItem if registeryItem?
+    _.set properties, 'octoblu.registryItem', {githubSlug} unless registeryItem?
     meshbluHttp.register properties, callback
 
   _createStatusDevice: ({ owner, uuid, meshbluHttp }, callback) =>
@@ -73,7 +74,6 @@ class CreateConnectorService
     return @_createError 'Create Connector: requires githubSlug in post body', 422 unless body.githubSlug?
     return @_createError 'Create Connector: requires owner in post body', 422 unless body.owner?
     return @_createError 'Create Connector: requires version in post body', 422 unless body.version?
-    return @_createError 'Create Connector: requires name in post body', 422 unless body.name?
     return @_createError 'Create Connector: requires connector in post body', 422 unless body.connector?
     return @_createError 'Create Connector: requires type in post body', 422 unless body.type?
     return null
