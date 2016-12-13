@@ -34,116 +34,304 @@ describe 'Create Connector', ->
     @fileDownloadService.destroy()
 
   describe 'On POST /create', ->
-    beforeEach (done) ->
-      userAuth = new Buffer('some-uuid:some-token').toString 'base64'
+    describe 'when succesful', ->
+      beforeEach (done) ->
+        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
 
-      @authDevice = @meshblu
-        .post '/authenticate'
-        .set 'Authorization', "Basic #{userAuth}"
-        .reply 204
+        @authDevice = @meshblu
+          .post '/authenticate'
+          .set 'Authorization', "Basic #{userAuth}"
+          .reply 204
 
-      @getSchemas = @fileDownloadService
-        .get '/github-release/some-owner/some-meshblu-connector/v1.0.0/schemas.json'
-        .reply 200, {
-          schemas: {
-            some: 'schema'
+        @getSchemas = @fileDownloadService
+          .get '/github-release/some-owner/some-meshblu-connector/v1.0.0/schemas.json'
+          .reply 200, {
+            schemas: {
+              some: 'schema'
+            }
           }
-        }
 
-      @createDevice = @meshblu
-        .post '/devices'
-        .set 'Authorization', "Basic #{userAuth}"
-        .send {
-          name: 'some-name',
-          type: 'some-type',
-          connector: 'some-meshblu-connector',
-          owner: 'some-owner',
-          discoverWhitelist: ['some-owner']
-          configureWhitelist: ['some-owner']
-          sendWhitelist: ['some-owner']
-          receiveWhitelist: ['some-owner']
-          schemas: {
-            some: 'schema'
+        @createDevice = @meshblu
+          .post '/devices'
+          .set 'Authorization', "Basic #{userAuth}"
+          .send {
+            name: 'some-name',
+            type: 'some-type',
+            connector: 'some-meshblu-connector',
+            owner: 'some-owner',
+            discoverWhitelist: ['some-owner']
+            configureWhitelist: ['some-owner']
+            sendWhitelist: ['some-owner']
+            receiveWhitelist: ['some-owner']
+            schemas: {
+              some: 'schema'
+            }
+            connectorMetadata: {
+              version: 'v1.0.0',
+              githubSlug: 'some-owner/some-meshblu-connector',
+              stopped: false
+            }
           }
-          connectorMetadata: {
-            version: 'v1.0.0',
-            githubSlug: 'some-owner/some-meshblu-connector',
-            stopped: false
+          .reply 201, {
+            uuid: 'some-device-uuid'
+            device: 'response'
+            fake: true
           }
-        }
-        .reply 201, {
+
+        @createStatusDevice = @meshblu
+          .post '/devices'
+          .set 'Authorization', "Basic #{userAuth}"
+          .send {
+            type: 'connector-status-device',
+            owner: 'some-device-uuid',
+            discoverWhitelist: ['some-device-uuid', 'some-owner']
+            configureWhitelist: ['some-device-uuid', 'some-owner']
+            sendWhitelist: ['some-device-uuid', 'some-owner']
+            receiveWhitelist: ['some-device-uuid', 'some-owner']
+          }
+          .reply 201, {
+            uuid: 'some-status-device-uuid'
+          }
+
+        @updateDevice = @meshblu
+          .put '/v2/devices/some-device-uuid'
+          .set 'Authorization', "Basic #{userAuth}"
+          .send {
+            $set:
+              statusDevice: 'some-status-device-uuid'
+            $addToSet:
+              'octoblu.links':
+                url: 'https://connector-factory.octoblu.com/connectors/configure/some-device-uuid'
+                title: 'View in Connector Factory'
+          }
+          .reply 204
+
+
+        options =
+          uri: '/create'
+          baseUrl: "http://localhost:#{@serverPort}"
+          auth:
+            username: 'some-uuid'
+            password: 'some-token'
+          json:
+            name: 'some-name',
+            type: 'some-type',
+            connector: 'some-meshblu-connector',
+            owner: 'some-owner',
+            version: 'v1.0.0'
+            githubSlug: 'some-owner/some-meshblu-connector'
+
+        request.post options, (error, @response, @body) =>
+          done error
+
+      it 'should return a 201', ->
+        expect(@response.statusCode).to.equal 201, @body
+
+      it 'should have the device creation response', ->
+        expect(@body).to.deep.equal {
           uuid: 'some-device-uuid'
           device: 'response'
           fake: true
         }
 
-      @createStatusDevice = @meshblu
-        .post '/devices'
-        .set 'Authorization', "Basic #{userAuth}"
-        .send {
-          type: 'connector-status-device',
-          owner: 'some-device-uuid',
-          discoverWhitelist: ['some-device-uuid', 'some-owner']
-          configureWhitelist: ['some-device-uuid', 'some-owner']
-          sendWhitelist: ['some-device-uuid', 'some-owner']
-          receiveWhitelist: ['some-device-uuid', 'some-owner']
-        }
-        .reply 201, {
-          uuid: 'some-status-device-uuid'
-        }
+      it 'should auth the request with meshblu', ->
+        @authDevice.done()
 
-      @updateDevice = @meshblu
-        .put '/v2/devices/some-device-uuid'
-        .set 'Authorization', "Basic #{userAuth}"
-        .send {
-          $set:
-            statusDevice: 'some-status-device-uuid'
-          $addToSet:
-            'octoblu.links':
-              url: 'https://connector-factory.octoblu.com/connectors/configure/some-device-uuid'
-              title: 'View in Connector Factory'
-        }
-        .reply 204
+      it 'should get the schema', ->
+        @getSchemas.done()
 
+      it 'should create the device in meshblu', ->
+        @createDevice.done()
 
-      options =
-        uri: '/create'
-        baseUrl: "http://localhost:#{@serverPort}"
-        auth:
-          username: 'some-uuid'
-          password: 'some-token'
-        json:
-          name: 'some-name',
-          type: 'some-type',
-          connector: 'some-meshblu-connector',
-          owner: 'some-owner',
-          version: 'v1.0.0'
-          githubSlug: 'some-owner/some-meshblu-connector'
+      it 'should create the status device in meshblu', ->
+        @createStatusDevice.done()
 
-      request.post options, (error, @response, @body) =>
-        done error
+      it 'should update the device with the statusDevice uuid', ->
+        @updateDevice.done()
 
-    it 'should return a 201', ->
-      expect(@response.statusCode).to.equal 201, @body
+    describe 'when it fails validation', ->
+      describe 'when missing the githubSlug', ->
+        beforeEach (done) ->
+          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
 
-    it 'should have the device creation response', ->
-      expect(@body).to.deep.equal {
-        uuid: 'some-device-uuid'
-        device: 'response'
-        fake: true
-      }
+          @authDevice = @meshblu
+            .post '/authenticate'
+            .set 'Authorization', "Basic #{userAuth}"
+            .reply 204
 
-    it 'should auth the request with meshblu', ->
-      @authDevice.done()
+          options =
+            uri: '/create'
+            baseUrl: "http://localhost:#{@serverPort}"
+            auth:
+              username: 'some-uuid'
+              password: 'some-token'
+            json:
+              type: '...'
+              owner: '...'
+              version: '...'
+              name: '...'
+              connector: '...'
 
-    it 'should get the schema', ->
-      @getSchemas.done()
+          request.post options, (error, @response, @body) =>
+            done error
 
-    it 'should create the device in meshblu', ->
-      @createDevice.done()
+        it 'should return a 422', ->
+          expect(@response.statusCode).to.equal 422
 
-    it 'should create the status device in meshblu', ->
-      @createStatusDevice.done()
+        it 'should return the error in the body', ->
+          expect(@body.error).to.equal 'Create Connector: requires githubSlug in post body'
 
-    it 'should update the device with the statusDevice uuid', ->
-      @updateDevice.done()
+      describe 'when missing the owner', ->
+        beforeEach (done) ->
+          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
+
+          @authDevice = @meshblu
+            .post '/authenticate'
+            .set 'Authorization', "Basic #{userAuth}"
+            .reply 204
+
+          options =
+            uri: '/create'
+            baseUrl: "http://localhost:#{@serverPort}"
+            auth:
+              username: 'some-uuid'
+              password: 'some-token'
+            json:
+              type: '...'
+              githubSlug: '...'
+              version: '...'
+              name: '...'
+              connector: '...'
+
+          request.post options, (error, @response, @body) =>
+            done error
+
+        it 'should return a 422', ->
+          expect(@response.statusCode).to.equal 422
+
+        it 'should return the error in the body', ->
+          expect(@body.error).to.equal 'Create Connector: requires owner in post body'
+
+      describe 'when missing the version', ->
+        beforeEach (done) ->
+          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
+
+          @authDevice = @meshblu
+            .post '/authenticate'
+            .set 'Authorization', "Basic #{userAuth}"
+            .reply 204
+
+          options =
+            uri: '/create'
+            baseUrl: "http://localhost:#{@serverPort}"
+            auth:
+              username: 'some-uuid'
+              password: 'some-token'
+            json:
+              type: '...'
+              githubSlug: '...'
+              owner: '...'
+              name: '...'
+              connector: '...'
+
+          request.post options, (error, @response, @body) =>
+            done error
+
+        it 'should return a 422', ->
+          expect(@response.statusCode).to.equal 422
+
+        it 'should return the error in the body', ->
+          expect(@body.error).to.equal 'Create Connector: requires version in post body'
+
+      describe 'when missing the name', ->
+        beforeEach (done) ->
+          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
+
+          @authDevice = @meshblu
+            .post '/authenticate'
+            .set 'Authorization', "Basic #{userAuth}"
+            .reply 204
+
+          options =
+            uri: '/create'
+            baseUrl: "http://localhost:#{@serverPort}"
+            auth:
+              username: 'some-uuid'
+              password: 'some-token'
+            json:
+              type: '...'
+              githubSlug: '...'
+              owner: '...'
+              version: '...'
+              connector: '...'
+
+          request.post options, (error, @response, @body) =>
+            done error
+
+        it 'should return a 422', ->
+          expect(@response.statusCode).to.equal 422
+
+        it 'should return the error in the body', ->
+          expect(@body.error).to.equal 'Create Connector: requires name in post body'
+
+      describe 'when missing the connector', ->
+        beforeEach (done) ->
+          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
+
+          @authDevice = @meshblu
+            .post '/authenticate'
+            .set 'Authorization', "Basic #{userAuth}"
+            .reply 204
+
+          options =
+            uri: '/create'
+            baseUrl: "http://localhost:#{@serverPort}"
+            auth:
+              username: 'some-uuid'
+              password: 'some-token'
+            json:
+              type: '...'
+              githubSlug: '...'
+              owner: '...'
+              version: '...'
+              name: '...'
+
+          request.post options, (error, @response, @body) =>
+            done error
+
+        it 'should return a 422', ->
+          expect(@response.statusCode).to.equal 422
+
+        it 'should return the error in the body', ->
+          expect(@body.error).to.equal 'Create Connector: requires connector in post body'
+
+      describe 'when missing the type', ->
+        beforeEach (done) ->
+          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
+
+          @authDevice = @meshblu
+            .post '/authenticate'
+            .set 'Authorization', "Basic #{userAuth}"
+            .reply 204
+
+          options =
+            uri: '/create'
+            baseUrl: "http://localhost:#{@serverPort}"
+            auth:
+              username: 'some-uuid'
+              password: 'some-token'
+            json:
+              githubSlug: '...'
+              owner: '...'
+              version: '...'
+              name: '...'
+              connector: '...'
+
+          request.post options, (error, @response, @body) =>
+            done error
+
+        it 'should return a 422', ->
+          expect(@response.statusCode).to.equal 422
+
+        it 'should return the error in the body', ->
+          expect(@body.error).to.equal 'Create Connector: requires type in post body'

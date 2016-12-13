@@ -6,6 +6,8 @@ class MeshbluConnectorService
     throw new Error 'Router: requires schemaService' unless @schemaService?
 
   create: ({ body, meshbluAuth }, callback) =>
+    validationError = @_validateBody body
+    return callback(validationError) if validationError?
     { githubSlug, version, owner } = body
     meshbluHttp = new MeshbluHttp meshbluAuth
     @schemaService.get { githubSlug, version }, (error, schemas) =>
@@ -63,7 +65,17 @@ class MeshbluConnectorService
     }
     meshbluHttp.updateDangerously device.uuid, query, callback
 
-  _createError: (code, message) =>
+  _validateBody: (body) =>
+    return @_createError 'Create Connector: requires a post body', 422 unless body?
+    return @_createError 'Create Connector: requires githubSlug in post body', 422 unless body.githubSlug?
+    return @_createError 'Create Connector: requires owner in post body', 422 unless body.owner?
+    return @_createError 'Create Connector: requires version in post body', 422 unless body.version?
+    return @_createError 'Create Connector: requires name in post body', 422 unless body.name?
+    return @_createError 'Create Connector: requires connector in post body', 422 unless body.connector?
+    return @_createError 'Create Connector: requires type in post body', 422 unless body.type?
+    return null
+
+  _createError: (message, code) =>
     error = new Error message
     error.code = code if code?
     return error
