@@ -3,7 +3,8 @@ octobluExpress          = require 'express-octoblu'
 MeshbluAuth             = require 'express-meshblu-auth'
 Router                  = require './router'
 SchemaService           = require './services/schema-service'
-MeshbluConnectorService = require './services/meshblu-connector-service'
+CreateConnectorService  = require './services/create-connector-service'
+UpgradeConnectorService = require './services/upgrade-connector-service'
 debug                   = require('debug')('meshblu-connector-service:server')
 
 class Server
@@ -22,8 +23,9 @@ class Server
     app.use meshbluAuth.gateway()
 
     schemaService = new SchemaService { @fileDownloaderUrl }
-    meshbluConnectorService = new MeshbluConnectorService {schemaService}
-    router = new Router {@meshbluConfig, meshbluConnectorService}
+    upgradeConnectorService = new UpgradeConnectorService { schemaService }
+    createConnectorService = new CreateConnectorService { schemaService }
+    router = new Router {@meshbluConfig,upgradeConnectorService,createConnectorService}
 
     router.route app
 

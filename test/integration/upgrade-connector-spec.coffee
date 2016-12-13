@@ -3,7 +3,7 @@ request       = require 'request'
 enableDestroy = require 'server-destroy'
 Server        = require '../../src/server'
 
-describe 'Create Connector', ->
+describe 'Upgrade Connector', ->
   beforeEach (done) ->
     @meshblu = shmock 0xd00d
     enableDestroy @meshblu
@@ -33,8 +33,8 @@ describe 'Create Connector', ->
     @server.destroy()
     @fileDownloadService.destroy()
 
-  describe 'On POST /create', ->
-    describe 'when succesful', ->
+  describe 'On PUT /upgrade/:uuid', ->
+    describe 'when it does not have a statusDevice', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
 
@@ -43,39 +43,20 @@ describe 'Create Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
+        @getDevice = @meshblu
+          .get '/v2/devices/some-device-uuid'
+          .set 'Authorization', "Basic #{userAuth}"
+          .reply 200, {
+            uuid: 'some-device-uuid'
+            statusDevice: null
+          }
+
         @getSchemas = @fileDownloadService
-          .get '/github-release/some-owner/some-meshblu-connector/v1.0.0/schemas.json'
+          .get '/github-release/some-owner/some-meshblu-connector/v2.0.0/schemas.json'
           .reply 200, {
             schemas: {
               some: 'schema'
             }
-          }
-
-        @createDevice = @meshblu
-          .post '/devices'
-          .set 'Authorization', "Basic #{userAuth}"
-          .send {
-            name: 'some-name',
-            type: 'some-type',
-            connector: 'some-meshblu-connector',
-            owner: 'some-owner',
-            discoverWhitelist: ['some-owner']
-            configureWhitelist: ['some-owner']
-            sendWhitelist: ['some-owner']
-            receiveWhitelist: ['some-owner']
-            schemas: {
-              some: 'schema'
-            }
-            connectorMetadata: {
-              version: 'v1.0.0',
-              githubSlug: 'some-owner/some-meshblu-connector',
-              stopped: false
-            }
-          }
-          .reply 201, {
-            uuid: 'some-device-uuid'
-            device: 'response'
-            fake: true
           }
 
         @createStatusDevice = @meshblu
@@ -94,29 +75,22 @@ describe 'Create Connector', ->
           }
 
         @updateDevice = @meshblu
-          .put '/v2/devices/some-device-uuid'
+          .patch '/v2/devices/some-device-uuid'
           .set 'Authorization', "Basic #{userAuth}"
           .send {
-            $set:
-              statusDevice: 'some-status-device-uuid'
-            $addToSet:
-              'octoblu.links':
-                url: 'https://connector-factory.octoblu.com/connectors/configure/some-device-uuid'
-                title: 'View in Connector Factory'
+            type: 'some-type'
+            connector: 'some-meshblu-connector'
+            statusDevice: 'some-status-device-uuid'
+            'connectorMetadata.version': 'v2.0.0',
+            'connectorMetadata.githubSlug': 'some-owner/some-meshblu-connector',
+            schemas: {
+              some: 'schema'
+            }
           }
           .reply 204
 
-        @getDeviceFinal = @meshblu
-          .get '/v2/devices/some-device-uuid'
-          .set 'Authorization', "Basic #{userAuth}"
-          .reply 200, {
-            uuid: 'some-device-uuid'
-            device: 'response'
-            fake: true
-          }
-
         options =
-          uri: '/create'
+          uri: '/upgrade/some-device-uuid'
           baseUrl: "http://localhost:#{@serverPort}"
           auth:
             username: 'some-uuid'
@@ -124,23 +98,16 @@ describe 'Create Connector', ->
           json:
             name: 'some-name',
             type: 'some-type',
+            owner: 'some-owner'
             connector: 'some-meshblu-connector',
-            owner: 'some-owner',
-            version: 'v1.0.0'
+            version: 'v2.0.0'
             githubSlug: 'some-owner/some-meshblu-connector'
 
-        request.post options, (error, @response, @body) =>
+        request.put options, (error, @response, @body) =>
           done error
 
-      it 'should return a 201', ->
-        expect(@response.statusCode).to.equal 201, @body
-
-      it 'should have the device creation response', ->
-        expect(@body).to.deep.equal {
-          uuid: 'some-device-uuid'
-          device: 'response'
-          fake: true
-        }
+      it 'should return a 204', ->
+        expect(@response.statusCode).to.equal 204, @body
 
       it 'should auth the request with meshblu', ->
         @authDevice.done()
@@ -148,17 +115,14 @@ describe 'Create Connector', ->
       it 'should get the schema', ->
         @getSchemas.done()
 
-      it 'should create the device in meshblu', ->
-        @createDevice.done()
+      it 'should get the device in meshblu', ->
+        @getDevice.done()
 
       it 'should create the status device in meshblu', ->
         @createStatusDevice.done()
 
       it 'should update the device with the statusDevice uuid', ->
         @updateDevice.done()
-
-      it 'should get the device and return it', ->
-        @getDeviceFinal.done()
 
     describe 'when it fails validation', ->
       describe 'when missing the githubSlug', ->
@@ -171,7 +135,7 @@ describe 'Create Connector', ->
             .reply 204
 
           options =
-            uri: '/create'
+            uri: '/upgrade/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -183,14 +147,14 @@ describe 'Create Connector', ->
               name: '...'
               connector: '...'
 
-          request.post options, (error, @response, @body) =>
+          request.put options, (error, @response, @body) =>
             done error
 
         it 'should return a 422', ->
           expect(@response.statusCode).to.equal 422
 
         it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Create Connector: requires githubSlug in post body'
+          expect(@body.error).to.equal 'Upgrade Connector: requires githubSlug in post body'
 
       describe 'when missing the owner', ->
         beforeEach (done) ->
@@ -202,7 +166,7 @@ describe 'Create Connector', ->
             .reply 204
 
           options =
-            uri: '/create'
+            uri: '/upgrade/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -214,14 +178,14 @@ describe 'Create Connector', ->
               name: '...'
               connector: '...'
 
-          request.post options, (error, @response, @body) =>
+          request.put options, (error, @response, @body) =>
             done error
 
         it 'should return a 422', ->
           expect(@response.statusCode).to.equal 422
 
         it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Create Connector: requires owner in post body'
+          expect(@body.error).to.equal 'Upgrade Connector: requires owner in post body'
 
       describe 'when missing the version', ->
         beforeEach (done) ->
@@ -233,7 +197,7 @@ describe 'Create Connector', ->
             .reply 204
 
           options =
-            uri: '/create'
+            uri: '/upgrade/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -245,14 +209,14 @@ describe 'Create Connector', ->
               name: '...'
               connector: '...'
 
-          request.post options, (error, @response, @body) =>
+          request.put options, (error, @response, @body) =>
             done error
 
         it 'should return a 422', ->
           expect(@response.statusCode).to.equal 422
 
         it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Create Connector: requires version in post body'
+          expect(@body.error).to.equal 'Upgrade Connector: requires version in post body'
 
       describe 'when missing the name', ->
         beforeEach (done) ->
@@ -264,7 +228,7 @@ describe 'Create Connector', ->
             .reply 204
 
           options =
-            uri: '/create'
+            uri: '/upgrade/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -276,14 +240,14 @@ describe 'Create Connector', ->
               version: '...'
               connector: '...'
 
-          request.post options, (error, @response, @body) =>
+          request.put options, (error, @response, @body) =>
             done error
 
         it 'should return a 422', ->
           expect(@response.statusCode).to.equal 422
 
         it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Create Connector: requires name in post body'
+          expect(@body.error).to.equal 'Upgrade Connector: requires name in post body'
 
       describe 'when missing the connector', ->
         beforeEach (done) ->
@@ -295,7 +259,7 @@ describe 'Create Connector', ->
             .reply 204
 
           options =
-            uri: '/create'
+            uri: '/upgrade/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -307,14 +271,14 @@ describe 'Create Connector', ->
               version: '...'
               name: '...'
 
-          request.post options, (error, @response, @body) =>
+          request.put options, (error, @response, @body) =>
             done error
 
         it 'should return a 422', ->
           expect(@response.statusCode).to.equal 422
 
         it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Create Connector: requires connector in post body'
+          expect(@body.error).to.equal 'Upgrade Connector: requires connector in post body'
 
       describe 'when missing the type', ->
         beforeEach (done) ->
@@ -326,7 +290,7 @@ describe 'Create Connector', ->
             .reply 204
 
           options =
-            uri: '/create'
+            uri: '/upgrade/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -338,11 +302,11 @@ describe 'Create Connector', ->
               name: '...'
               connector: '...'
 
-          request.post options, (error, @response, @body) =>
+          request.put options, (error, @response, @body) =>
             done error
 
         it 'should return a 422', ->
           expect(@response.statusCode).to.equal 422
 
         it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Create Connector: requires type in post body'
+          expect(@body.error).to.equal 'Upgrade Connector: requires type in post body'

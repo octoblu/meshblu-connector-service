@@ -1,12 +1,14 @@
 MeshbluConnectorController = require './controllers/meshblu-connector-controller'
 
 class Router
-  constructor: ({@meshbluConnectorService}) ->
-    throw new Error 'Router: requires meshbluConnectorService' unless @meshbluConnectorService?
+  constructor: ({@createConnectorService,@upgradeConnectorService}) ->
+    throw new Error 'Router: requires createConnectorService' unless @createConnectorService?
+    throw new Error 'Router: requires upgradeConnectorService' unless @upgradeConnectorService?
 
   route: (app) =>
-    meshbluConnectorController = new MeshbluConnectorController {@meshbluConnectorService}
+    meshbluConnectorController = new MeshbluConnectorController {@createConnectorService,@upgradeConnectorService}
 
     app.post '/create', meshbluConnectorController.create
+    app.put '/upgrade/:uuid', meshbluConnectorController.upgrade
 
 module.exports = Router

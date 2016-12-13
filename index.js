@@ -1,2 +1,2 @@
 require('coffee-script/register');
-module.exports = require('./src/services/meshblu-connector-service.coffee');
+module.exports = require('./src/services/index.coffee');

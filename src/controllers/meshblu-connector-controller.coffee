@@ -1,11 +1,19 @@
 class MeshbluConnectorController
-  constructor: ({@meshbluConnectorService}) ->
-    throw new Error 'MeshbluConnectorController: requires meshbluConnectorService' unless @meshbluConnectorService?
+  constructor: ({@createConnectorService,@upgradeConnectorService}) ->
+    throw new Error 'MeshbluConnectorController: requires createConnectorService' unless @createConnectorService?
+    throw new Error 'MeshbluConnectorController: requires upgradeConnectorService' unless @upgradeConnectorService?
 
   create: (request, response) =>
     { meshbluAuth, body } = request
-    @meshbluConnectorService.create { body, meshbluAuth }, (error, device) =>
+    @createConnectorService.do { body, meshbluAuth }, (error, device) =>
       return response.sendError(error) if error?
       response.status(201).send(device)
+
+  upgrade: (request, response) =>
+    { meshbluAuth, body } = request
+    { uuid } = request.params
+    @upgradeConnectorService.do { body, meshbluAuth, uuid }, (error, device) =>
+      return response.sendError(error) if error?
+      response.sendStatus(204)
 
 module.exports = MeshbluConnectorController

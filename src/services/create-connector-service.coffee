@@ -1,11 +1,11 @@
 _           = require 'lodash'
 MeshbluHttp = require 'meshblu-http'
 
-class MeshbluConnectorService
+class CreateConnectorService
   constructor: ({ @schemaService }) ->
-    throw new Error 'Router: requires schemaService' unless @schemaService?
+    throw new Error 'CreateConnectorService: requires schemaService' unless @schemaService?
 
-  create: ({ body, meshbluAuth }, callback) =>
+  do: ({ body, meshbluAuth }, callback) =>
     validationError = @_validateBody body
     return callback(validationError) if validationError?
     { githubSlug, version, owner } = body
@@ -19,7 +19,10 @@ class MeshbluConnectorService
           return callback error if error?
           @_updateDevice { device, statusDevice, meshbluHttp }, (error) =>
             return callback error if error?
-            callback null, device
+            @_getConnectorDevice { uuid, meshbluHttp }, callback
+
+  _getConnectorDevice: ({ uuid, meshbluHttp }, callback) =>
+    meshbluHttp.device uuid, callback
 
   _createConnectorDevice: ({ body, meshbluHttp, schemas }, callback) =>
     { name, connector, type, githubSlug, version } = body
@@ -80,4 +83,4 @@ class MeshbluConnectorService
     error.code = code if code?
     return error
 
-module.exports = MeshbluConnectorService
+module.exports = CreateConnectorService
