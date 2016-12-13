@@ -33,7 +33,7 @@ describe 'Create Connector', ->
     @server.destroy()
     @fileDownloadService.destroy()
 
-  describe 'On POST /create', ->
+  describe 'On POST /users/some-owner/connectors', ->
     describe 'when succesful', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
@@ -117,7 +117,7 @@ describe 'Create Connector', ->
           }
 
         options =
-          uri: '/create'
+          uri: '/users/some-owner/connectors'
           baseUrl: "http://localhost:#{@serverPort}"
           auth:
             username: 'some-uuid'
@@ -126,7 +126,6 @@ describe 'Create Connector', ->
             name: 'some-name',
             type: 'some-type',
             connector: 'some-meshblu-connector',
-            owner: 'some-owner',
             version: 'v1.0.0'
             githubSlug: 'some-owner/some-meshblu-connector'
 
@@ -172,14 +171,13 @@ describe 'Create Connector', ->
             .reply 204
 
           options =
-            uri: '/create'
+            uri: '/users/some-owner/connectors'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
               password: 'some-token'
             json:
               type: '...'
-              owner: '...'
               version: '...'
               name: '...'
               connector: '...'
@@ -193,37 +191,6 @@ describe 'Create Connector', ->
         it 'should return the error in the body', ->
           expect(@body.error).to.equal 'Create Connector: requires githubSlug in post body'
 
-      describe 'when missing the owner', ->
-        beforeEach (done) ->
-          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-          @authDevice = @meshblu
-            .post '/authenticate'
-            .set 'Authorization', "Basic #{userAuth}"
-            .reply 204
-
-          options =
-            uri: '/create'
-            baseUrl: "http://localhost:#{@serverPort}"
-            auth:
-              username: 'some-uuid'
-              password: 'some-token'
-            json:
-              type: '...'
-              githubSlug: '...'
-              version: '...'
-              name: '...'
-              connector: '...'
-
-          request.post options, (error, @response, @body) =>
-            done error
-
-        it 'should return a 422', ->
-          expect(@response.statusCode).to.equal 422
-
-        it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Create Connector: requires owner in post body'
-
       describe 'when missing the version', ->
         beforeEach (done) ->
           userAuth = new Buffer('some-uuid:some-token').toString 'base64'
@@ -234,7 +201,7 @@ describe 'Create Connector', ->
             .reply 204
 
           options =
-            uri: '/create'
+            uri: '/users/some-owner/connectors'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -242,7 +209,6 @@ describe 'Create Connector', ->
             json:
               type: '...'
               githubSlug: '...'
-              owner: '...'
               name: '...'
               connector: '...'
 
@@ -265,7 +231,7 @@ describe 'Create Connector', ->
             .reply 204
 
           options =
-            uri: '/create'
+            uri: '/users/some-owner/connectors'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -273,7 +239,6 @@ describe 'Create Connector', ->
             json:
               type: '...'
               githubSlug: '...'
-              owner: '...'
               version: '...'
               name: '...'
 
@@ -296,14 +261,13 @@ describe 'Create Connector', ->
             .reply 204
 
           options =
-            uri: '/create'
+            uri: '/users/some-owner/connectors'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
               password: 'some-token'
             json:
               githubSlug: '...'
-              owner: '...'
               version: '...'
               name: '...'
               connector: '...'

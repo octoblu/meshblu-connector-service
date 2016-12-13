@@ -5,14 +5,14 @@ class CreateConnectorService
   constructor: ({ @schemaService }) ->
     throw new Error 'CreateConnectorService: requires schemaService' unless @schemaService?
 
-  do: ({ body, meshbluAuth }, callback) =>
+  do: ({ body, meshbluAuth, owner }, callback) =>
     validationError = @_validateBody body
     return callback(validationError) if validationError?
-    { githubSlug, version, owner } = body
+    { githubSlug, version } = body
     meshbluHttp = new MeshbluHttp meshbluAuth
     @schemaService.get { githubSlug, version }, (error, schemas) =>
       return callback error if error?
-      @_createConnectorDevice { body, meshbluHttp, schemas }, (error, device) =>
+      @_createConnectorDevice { owner, body, meshbluHttp, schemas }, (error, device) =>
         return callback error if error?
         { uuid } = device
         @_createStatusDevice { uuid, owner, meshbluHttp }, (error, statusDevice) =>
@@ -24,9 +24,9 @@ class CreateConnectorService
   _getConnectorDevice: ({ uuid, meshbluHttp }, callback) =>
     meshbluHttp.device uuid, callback
 
-  _createConnectorDevice: ({ body, meshbluHttp, schemas }, callback) =>
+  _createConnectorDevice: ({ owner, body, meshbluHttp, schemas }, callback) =>
     { name, connector, type, githubSlug, version } = body
-    { registryItem, owner } = body
+    { registryItem } = body
     properties = _.defaultsDeep {
       type,
       connector,
@@ -72,7 +72,6 @@ class CreateConnectorService
   _validateBody: (body) =>
     return @_createError 'Create Connector: requires a post body', 422 unless body?
     return @_createError 'Create Connector: requires githubSlug in post body', 422 unless body.githubSlug?
-    return @_createError 'Create Connector: requires owner in post body', 422 unless body.owner?
     return @_createError 'Create Connector: requires version in post body', 422 unless body.version?
     return @_createError 'Create Connector: requires connector in post body', 422 unless body.connector?
     return @_createError 'Create Connector: requires type in post body', 422 unless body.type?

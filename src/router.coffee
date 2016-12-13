@@ -8,7 +8,7 @@ class Router
   route: (app) =>
     meshbluConnectorController = new MeshbluConnectorController {@createConnectorService,@upgradeConnectorService}
 
-    app.post '/create', meshbluConnectorController.create
-    app.put '/upgrade/:uuid', meshbluConnectorController.upgrade
+    app.post '/users/:owner/connectors', meshbluConnectorController.create
+    app.put '/users/:owner/connectors/:uuid', meshbluConnectorController.upgrade
 
 module.exports = Router

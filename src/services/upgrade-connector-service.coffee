@@ -5,13 +5,13 @@ class UpgradeConnectorService
   constructor: ({ @schemaService }) ->
     throw new Error 'UpgradeConnectorService: requires schemaService' unless @schemaService?
 
-  do: ({ body, uuid, meshbluAuth }, callback) =>
+  do: ({ body, uuid, meshbluAuth, owner }, callback) =>
     validationError = @_validateBody body
     return callback validationError if validationError?
     meshbluHttp = new MeshbluHttp meshbluAuth
     @_getConnectorDevice { uuid, meshbluHttp }, (error, device) =>
       return callback error if error?
-      { githubSlug, version, owner } = body
+      { githubSlug, version } = body
       body = @_createUpdateBody { device, body }
       validationError = @_validateUpdateBody body
       return callback validationError if validationError?
@@ -63,7 +63,6 @@ class UpgradeConnectorService
 
   _validateBody: (body) =>
     return @_createError 'Upgrade Connector: requires a post body', 422 unless body?
-    return @_createError 'Upgrade Connector: requires owner in post body', 422 unless body.owner?
     return @_createError 'Upgrade Connector: requires version in post body', 422 unless body.version?
     return null
 

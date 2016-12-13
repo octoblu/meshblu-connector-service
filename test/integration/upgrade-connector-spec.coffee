@@ -33,7 +33,7 @@ describe 'Upgrade Connector', ->
     @server.destroy()
     @fileDownloadService.destroy()
 
-  describe 'On PUT /upgrade/:uuid', ->
+  describe 'On PUT /users/some-owner/connectors/:uuid', ->
     describe 'when it does not have a statusDevice', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
@@ -93,14 +93,13 @@ describe 'Upgrade Connector', ->
           .reply 204
 
         options =
-          uri: '/upgrade/some-device-uuid'
+          uri: '/users/some-owner/connectors/some-device-uuid'
           baseUrl: "http://localhost:#{@serverPort}"
           auth:
             username: 'some-uuid'
             password: 'some-token'
           json:
             type: 'some-type',
-            owner: 'some-owner'
             connector: 'some-meshblu-connector',
             version: 'v2.0.0'
             githubSlug: 'some-owner/some-meshblu-connector'
@@ -186,7 +185,7 @@ describe 'Upgrade Connector', ->
           .reply 204
 
         options =
-          uri: '/upgrade/some-device-uuid'
+          uri: '/users/some-owner/connectors/some-device-uuid'
           baseUrl: "http://localhost:#{@serverPort}"
           auth:
             username: 'some-uuid'
@@ -194,7 +193,6 @@ describe 'Upgrade Connector', ->
           json:
             name: 'some-name',
             type: 'some-type',
-            owner: 'some-owner'
             connector: 'some-meshblu-connector',
             version: 'v2.0.0'
             githubSlug: 'some-owner/some-meshblu-connector'
@@ -239,14 +237,13 @@ describe 'Upgrade Connector', ->
             }
 
           options =
-            uri: '/upgrade/some-device-uuid'
+            uri: '/users/some-owner/connectors/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
               password: 'some-token'
             json:
               type: '...'
-              owner: '...'
               version: '...'
               name: '...'
               connector: '...'
@@ -260,45 +257,6 @@ describe 'Upgrade Connector', ->
         it 'should return the error in the body', ->
           expect(@body.error).to.equal 'Upgrade Connector: requires githubSlug in post body'
 
-      describe 'when missing the owner', ->
-        beforeEach (done) ->
-          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-          @authDevice = @meshblu
-            .post '/authenticate'
-            .set 'Authorization', "Basic #{userAuth}"
-            .reply 204
-
-          @getDevice = @meshblu
-            .get '/v2/devices/some-device-uuid'
-            .set 'Authorization', "Basic #{userAuth}"
-            .reply 200, {
-              uuid: 'some-device-uuid'
-              statusDevice: 'some-status-device-uuid'
-            }
-
-          options =
-            uri: '/upgrade/some-device-uuid'
-            baseUrl: "http://localhost:#{@serverPort}"
-            auth:
-              username: 'some-uuid'
-              password: 'some-token'
-            json:
-              type: '...'
-              githubSlug: '...'
-              version: '...'
-              name: '...'
-              connector: '...'
-
-          request.put options, (error, @response, @body) =>
-            done error
-
-        it 'should return a 422', ->
-          expect(@response.statusCode).to.equal 422
-
-        it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Upgrade Connector: requires owner in post body'
-
       describe 'when missing the version', ->
         beforeEach (done) ->
           userAuth = new Buffer('some-uuid:some-token').toString 'base64'
@@ -309,7 +267,7 @@ describe 'Upgrade Connector', ->
             .reply 204
 
           options =
-            uri: '/upgrade/some-device-uuid'
+            uri: '/users/some-owner/connectors/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -317,7 +275,6 @@ describe 'Upgrade Connector', ->
             json:
               type: '...'
               githubSlug: '...'
-              owner: '...'
               name: '...'
               connector: '...'
 
@@ -348,7 +305,7 @@ describe 'Upgrade Connector', ->
             }
 
           options =
-            uri: '/upgrade/some-device-uuid'
+            uri: '/users/some-owner/connectors/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -356,7 +313,6 @@ describe 'Upgrade Connector', ->
             json:
               type: '...'
               githubSlug: '...'
-              owner: '...'
               version: '...'
               name: '...'
 
@@ -385,16 +341,15 @@ describe 'Upgrade Connector', ->
               uuid: 'some-device-uuid'
               statusDevice: 'some-status-device-uuid'
             }
-            
+
           options =
-            uri: '/upgrade/some-device-uuid'
+            uri: '/users/some-owner/connectors/some-device-uuid'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
               password: 'some-token'
             json:
               githubSlug: '...'
-              owner: '...'
               version: '...'
               name: '...'
               connector: '...'
