@@ -1159,6 +1159,10 @@ json-diff@0.3.1:
     difflib "~0.2.1"
     dreamopt "~0.6.0"
 
+json-schema-defaults@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/json-schema-defaults/-/json-schema-defaults-0.2.0.tgz#89ceb86ff0537dfbc1a6ddb52f2bd03efa85ff89"
+
 json-schema@0.2.3:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/json-schema/-/json-schema-0.2.3.tgz#b480c892e59a2f05954ce727bd3f2a4e882f9e13"
