@@ -16,16 +16,21 @@ class SchemaService
       return callback @_createError('Invalid fetch schema response', response.statusCode) if response.statusCode > 399
       callback null, _.get(body, 'schemas', {})
 
-  defaults: ({ schemas }) =>
-    defaultSchema = @_findDefaultSchema({ schemas })
-    return null if _.isEmpty defaultSchema
-    return jsonSchemaDefaults defaultSchema
+  defaultOptions: ({ schemas }) =>
+    key = @getDefaultSchemaKey({ schemas })
+    return unless key?
+    defaultSchema = schemas.configure[key]
+    return if _.isEmpty defaultSchema
+    options = jsonSchemaDefaults(defaultSchema) ? {}
+    _.set options, 'schemas.selected.configure', key
+    return options
 
-  _findDefaultSchema: ({ schemas }) =>
-    return null unless schemas?.configure?
+  getDefaultSchemaKey: ({ schemas }) =>
+    return unless schemas?.configure?
     keys = _.keys(schemas.configure)
-    return _.get(schemas, "configure.#{_.first(keys)}") if _.size(keys) == 1
-    return _.get(schemas, 'configure.Default', _.get(schemas, 'configure.default'))
+    return _.first(keys) if _.size(keys) == 1
+    return 'Default' if schemas.configure.Default?
+    return 'default' if schemas.configure.default?
 
   _createError: (code, message) =>
     error = new Error message

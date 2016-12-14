@@ -41,7 +41,7 @@ class CreateConnectorService
         githubSlug,
         stopped: false
       }
-    }, @schemaService.defaults({ schemas })
+    }, @schemaService.defaultOptions({ schemas })
     _.set properties, 'name', name
     _.set properties, 'octoblu.registryItem', registryItem if registeryItem?
     _.set properties, 'octoblu.registryItem', {githubSlug} unless registeryItem?

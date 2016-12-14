@@ -46,9 +46,12 @@ describe 'Create Connector', ->
         @getSchemas = @fileDownloadService
           .get '/github-release/some-owner/some-meshblu-connector/v1.0.0/schemas.json'
           .reply 200, {
-            schemas: {
-              some: 'schema'
-            }
+            schemas:
+              configure:
+                'some-schema':
+                  properties:
+                    hi:
+                      type: "bool"
           }
 
         @createDevice = @meshblu
@@ -64,7 +67,13 @@ describe 'Create Connector', ->
             sendWhitelist: ['some-owner']
             receiveWhitelist: ['some-owner']
             schemas:
-              some: 'schema'
+              configure:
+                'some-schema':
+                  properties:
+                    hi:
+                      type: 'bool'
+              selected:
+                configure: 'some-schema'
             octoblu:
               registryItem:
                 githubSlug: 'some-owner/some-meshblu-connector'
@@ -132,16 +141,6 @@ describe 'Create Connector', ->
         request.post options, (error, @response, @body) =>
           done error
 
-      it 'should return a 201', ->
-        expect(@response.statusCode).to.equal 201, @body
-
-      it 'should have the device creation response', ->
-        expect(@body).to.deep.equal {
-          uuid: 'some-device-uuid'
-          device: 'response'
-          fake: true
-        }
-
       it 'should auth the request with meshblu', ->
         @authDevice.done()
 
@@ -159,6 +158,17 @@ describe 'Create Connector', ->
 
       it 'should get the device and return it', ->
         @getDeviceFinal.done()
+
+      it 'should return a 201', ->
+        expect(@response.statusCode).to.equal 201, @body
+
+      it 'should have the device creation response', ->
+        expect(@body).to.deep.equal {
+          uuid: 'some-device-uuid'
+          device: 'response'
+          fake: true
+        }
+
 
     describe 'when it fails validation', ->
       describe 'when missing the githubSlug', ->

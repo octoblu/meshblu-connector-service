@@ -45,7 +45,7 @@ class UpgradeConnectorService
       'connectorMetadata.version': version
       'connectorMetadata.githubSlug': githubSlug
       schemas
-    }, @schemaService.defaults({ schemas })
+    }, @schemaService.defaultOptions({ schemas })
     _.set properties, 'name', name if name?
     _.set properties, 'statusDevice', statusDevice.uuid if statusDevice?.uuid?
     properties['octoblu.registryItem'] = registryItem if registryItem?

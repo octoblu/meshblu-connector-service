@@ -54,9 +54,12 @@ describe 'Upgrade Connector', ->
         @getSchemas = @fileDownloadService
           .get '/github-release/some-owner/some-meshblu-connector/v2.0.0/schemas.json'
           .reply 200, {
-            schemas: {
-              some: 'schema'
-            }
+            schemas:
+              configure:
+                'some-schema':
+                  properties:
+                    hi:
+                      type: 'bool'
           }
 
         @createStatusDevice = @meshblu
@@ -83,12 +86,16 @@ describe 'Upgrade Connector', ->
             statusDevice: 'some-status-device-uuid'
             'connectorMetadata.version': 'v2.0.0',
             'connectorMetadata.githubSlug': 'some-owner/some-meshblu-connector',
-            schemas: {
-              some: 'schema'
-            },
-            'octoblu.registryItem': {
+            schemas:
+              configure:
+                'some-schema':
+                  properties:
+                    hi:
+                      type: 'bool'
+              selected:
+                configure: 'some-schema'
+            'octoblu.registryItem':
               githubSlug: 'some-owner/some-meshblu-connector'
-            }
           }
           .reply 204
 
