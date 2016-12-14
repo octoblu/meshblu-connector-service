@@ -43,13 +43,13 @@ class UpgradeConnectorService
   _updateDevice: ({ uuid, version, statusDevice, body, schemas, meshbluHttp }, callback) =>
     { githubSlug, name, connector, type } = body
     { registryItem, iconUri } = body
-    properties = _.defaultsDeep {
+    properties = {
       type
       connector
       'connectorMetadata.version': version
       'connectorMetadata.githubSlug': githubSlug
       schemas
-    }, @schemaService.defaultOptions({ schemas })
+    }
     _.set properties, 'iconUri', iconUri if iconUri?
     _.set properties, 'name', name if name?
     _.set properties, 'statusDevice', statusDevice.uuid if statusDevice?.uuid?

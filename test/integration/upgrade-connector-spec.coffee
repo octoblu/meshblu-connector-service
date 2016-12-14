@@ -97,8 +97,6 @@ describe 'Upgrade Connector', ->
                   properties:
                     hi:
                       type: 'bool'
-              selected:
-                configure: 'some-schema'
             'octoblu.registryItem':
               githubSlug: 'some-owner/some-meshblu-connector'
           }
