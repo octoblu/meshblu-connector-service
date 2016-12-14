@@ -38,7 +38,8 @@ class UpgradeConnectorService
     meshbluHttp.register properties, callback
 
   _updateDevice: ({ uuid, statusDevice, body, schemas, meshbluHttp }, callback) =>
-    { githubSlug, name, version, connector, type, registryItem } = body
+    { githubSlug, name, version, connector, type } = body
+    { registryItem, iconUri } = body
     properties = _.defaultsDeep {
       type
       connector
@@ -46,6 +47,7 @@ class UpgradeConnectorService
       'connectorMetadata.githubSlug': githubSlug
       schemas
     }, @schemaService.defaultOptions({ schemas })
+    _.set properties, 'iconUri', iconUri if iconUri?
     _.set properties, 'name', name if name?
     _.set properties, 'statusDevice', statusDevice.uuid if statusDevice?.uuid?
     properties['octoblu.registryItem'] = registryItem if registryItem?

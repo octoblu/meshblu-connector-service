@@ -26,7 +26,7 @@ class CreateConnectorService
 
   _createConnectorDevice: ({ owner, body, meshbluHttp, schemas }, callback) =>
     { name, connector, type, githubSlug, version } = body
-    { registryItem } = body
+    { registryItem, iconUri } = body
     properties = _.defaultsDeep {
       type,
       connector,
@@ -43,8 +43,9 @@ class CreateConnectorService
       }
     }, @schemaService.defaultOptions({ schemas })
     _.set properties, 'name', name
-    _.set properties, 'octoblu.registryItem', registryItem if registeryItem?
-    _.set properties, 'octoblu.registryItem', {githubSlug} unless registeryItem?
+    _.set properties, 'iconUri', iconUri if iconUri?
+    _.set properties, 'octoblu.registryItem', registryItem if registryItem?
+    _.set properties, 'octoblu.registryItem', {githubSlug} unless registryItem?
     meshbluHttp.register properties, callback
 
   _createStatusDevice: ({ owner, uuid, meshbluHttp }, callback) =>

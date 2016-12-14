@@ -86,6 +86,7 @@ describe 'Upgrade Connector', ->
             statusDevice: 'some-status-device-uuid'
             'connectorMetadata.version': 'v2.0.0',
             'connectorMetadata.githubSlug': 'some-owner/some-meshblu-connector',
+            iconUri: 'some-icon-uri'
             schemas:
               configure:
                 'some-schema':
@@ -106,6 +107,7 @@ describe 'Upgrade Connector', ->
             username: 'some-uuid'
             password: 'some-token'
           json:
+            iconUri: 'some-icon-uri'
             type: 'some-type',
             connector: 'some-meshblu-connector',
             version: 'v2.0.0'

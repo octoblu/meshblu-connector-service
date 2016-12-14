@@ -66,6 +66,7 @@ describe 'Create Connector', ->
             configureWhitelist: ['some-owner']
             sendWhitelist: ['some-owner']
             receiveWhitelist: ['some-owner']
+            iconUri: 'some-icon-uri'
             schemas:
               configure:
                 'some-schema':
@@ -132,6 +133,7 @@ describe 'Create Connector', ->
             username: 'some-uuid'
             password: 'some-token'
           json:
+            iconUri: 'some-icon-uri'
             name: 'some-name',
             type: 'some-type',
             connector: 'some-meshblu-connector',
