@@ -3,14 +3,16 @@ octobluExpress          = require 'express-octoblu'
 MeshbluAuth             = require 'express-meshblu-auth'
 Router                  = require './router'
 SchemaService           = require './services/schema-service'
+ConnectorDetailService  = require './services/connector-detail-service'
 CreateConnectorService  = require './services/create-connector-service'
 UpgradeConnectorService = require './services/upgrade-connector-service'
 debug                   = require('debug')('meshblu-connector-service:server')
 
 class Server
-  constructor: ({@logFn, @disableLogging, @port, @meshbluConfig, @fileDownloaderUrl})->
+  constructor: ({@logFn, @disableLogging, @port, @meshbluConfig, @fileDownloaderUrl, @connectorDetailUrl})->
     throw new Error 'Server: requires meshbluConfig' unless @meshbluConfig?
-    throw new Error 'Server: requries fileDownloaderUrl' unless @fileDownloaderUrl?
+    throw new Error 'Server: requires fileDownloaderUrl' unless @fileDownloaderUrl?
+    throw new Error 'Server: requires connectorDetailUrl' unless @connectorDetailUrl?
 
   address: =>
     @server.address()
@@ -23,8 +25,9 @@ class Server
     app.use meshbluAuth.gateway()
 
     schemaService = new SchemaService { @fileDownloaderUrl }
-    upgradeConnectorService = new UpgradeConnectorService { schemaService }
-    createConnectorService = new CreateConnectorService { schemaService }
+    connectorDetailService = new ConnectorDetailService { @connectorDetailUrl }
+    upgradeConnectorService = new UpgradeConnectorService { schemaService, connectorDetailService }
+    createConnectorService = new CreateConnectorService { schemaService, connectorDetailService }
     router = new Router {@meshbluConfig,upgradeConnectorService,createConnectorService}
 
     router.route app

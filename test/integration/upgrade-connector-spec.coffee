@@ -9,6 +9,8 @@ describe 'Upgrade Connector', ->
     enableDestroy @meshblu
     @fileDownloadService = shmock 0xbabe
     enableDestroy @fileDownloadService
+    @connectorDetailService = shmock 0xdead
+    enableDestroy @connectorDetailService
 
     @logFn = sinon.spy()
     serverOptions =
@@ -16,6 +18,7 @@ describe 'Upgrade Connector', ->
       disableLogging: true
       logFn: @logFn
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
+      connectorDetailUrl: "http://localhost:#{0xdead}"
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'
@@ -32,6 +35,7 @@ describe 'Upgrade Connector', ->
     @meshblu.destroy()
     @server.destroy()
     @fileDownloadService.destroy()
+    @connectorDetailService.destroy()
 
   describe 'On PUT /users/some-owner/connectors/:uuid', ->
     describe 'when it does not have a statusDevice', ->
@@ -143,6 +147,14 @@ describe 'Upgrade Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
+        @getLatestTag = @connectorDetailService
+          .get '/github/some-owner/some-meshblu-connector'
+          .reply 200, {
+            latest: {
+              tag: 'v2.5.0'
+            }
+          }
+
         @getDevice = @meshblu
           .get '/v2/devices/some-device-uuid'
           .set 'Authorization', "Basic #{userAuth}"
@@ -152,7 +164,7 @@ describe 'Upgrade Connector', ->
           }
 
         @getSchemas = @fileDownloadService
-          .get '/github-release/some-owner/some-meshblu-connector/v2.0.0/schemas.json'
+          .get '/github-release/some-owner/some-meshblu-connector/v2.5.0/schemas.json'
           .reply 200, {
             schemas: {
               some: 'schema'
@@ -182,7 +194,7 @@ describe 'Upgrade Connector', ->
             type: 'some-type'
             connector: 'some-meshblu-connector'
             statusDevice: 'some-status-device-uuid'
-            'connectorMetadata.version': 'v2.0.0',
+            'connectorMetadata.version': 'v2.5.0',
             'connectorMetadata.githubSlug': 'some-owner/some-meshblu-connector',
             schemas: {
               some: 'schema'
@@ -200,10 +212,10 @@ describe 'Upgrade Connector', ->
             username: 'some-uuid'
             password: 'some-token'
           json:
+            version: 'latest'
             name: 'some-name',
             type: 'some-type',
             connector: 'some-meshblu-connector',
-            version: 'v2.0.0'
             githubSlug: 'some-owner/some-meshblu-connector'
 
         request.put options, (error, @response, @body) =>
@@ -220,6 +232,9 @@ describe 'Upgrade Connector', ->
 
       it 'should get the device in meshblu', ->
         @getDevice.done()
+
+      it 'should get the latest tag', ->
+        @getLatestTag.done()
 
       it 'should not create the status device in meshblu', ->
         expect(@createStatusDevice.isDone).to.be.false
@@ -265,36 +280,6 @@ describe 'Upgrade Connector', ->
 
         it 'should return the error in the body', ->
           expect(@body.error).to.equal 'Upgrade Connector: requires githubSlug in post body'
-
-      describe 'when missing the version', ->
-        beforeEach (done) ->
-          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-          @authDevice = @meshblu
-            .post '/authenticate'
-            .set 'Authorization', "Basic #{userAuth}"
-            .reply 204
-
-          options =
-            uri: '/users/some-owner/connectors/some-device-uuid'
-            baseUrl: "http://localhost:#{@serverPort}"
-            auth:
-              username: 'some-uuid'
-              password: 'some-token'
-            json:
-              type: '...'
-              githubSlug: '...'
-              name: '...'
-              connector: '...'
-
-          request.put options, (error, @response, @body) =>
-            done error
-
-        it 'should return a 422', ->
-          expect(@response.statusCode).to.equal 422
-
-        it 'should return the error in the body', ->
-          expect(@body.error).to.equal 'Upgrade Connector: requires version in post body'
 
       describe 'when missing the connector', ->
         beforeEach (done) ->

@@ -2,30 +2,33 @@ _           = require 'lodash'
 MeshbluHttp = require 'meshblu-http'
 
 class CreateConnectorService
-  constructor: ({ @schemaService }) ->
+  constructor: ({ @schemaService, @connectorDetailService }) ->
     throw new Error 'CreateConnectorService: requires schemaService' unless @schemaService?
+    throw new Error 'CreateConnectorService: requires connectorDetailService' unless @connectorDetailService?
 
   do: ({ body, meshbluAuth, owner }, callback) =>
     validationError = @_validateBody body
     return callback(validationError) if validationError?
     { githubSlug, version } = body
-    meshbluHttp = new MeshbluHttp meshbluAuth
-    @schemaService.get { githubSlug, version }, (error, schemas) =>
+    @connectorDetailService.getLatestTag { version, githubSlug }, (error, version) =>
       return callback error if error?
-      @_createConnectorDevice { owner, body, meshbluHttp, schemas }, (error, device) =>
+      meshbluHttp = new MeshbluHttp meshbluAuth
+      @schemaService.get { githubSlug, version }, (error, schemas) =>
         return callback error if error?
-        { uuid } = device
-        @_createStatusDevice { uuid, owner, meshbluHttp }, (error, statusDevice) =>
+        @_createConnectorDevice { owner, body, version, meshbluHttp, schemas }, (error, device) =>
           return callback error if error?
-          @_updateDevice { device, statusDevice, meshbluHttp }, (error) =>
+          { uuid } = device
+          @_createStatusDevice { uuid, owner, meshbluHttp }, (error, statusDevice) =>
             return callback error if error?
-            @_getConnectorDevice { uuid, meshbluHttp }, callback
+            @_updateDevice { device, statusDevice, meshbluHttp }, (error) =>
+              return callback error if error?
+              @_getConnectorDevice { uuid, meshbluHttp }, callback
 
   _getConnectorDevice: ({ uuid, meshbluHttp }, callback) =>
     meshbluHttp.device uuid, callback
 
-  _createConnectorDevice: ({ owner, body, meshbluHttp, schemas }, callback) =>
-    { name, connector, type, githubSlug, version } = body
+  _createConnectorDevice: ({ owner, body, version, meshbluHttp, schemas }, callback) =>
+    { name, connector, type, githubSlug } = body
     { registryItem, iconUri } = body
     properties = _.defaultsDeep {
       type,
@@ -73,7 +76,6 @@ class CreateConnectorService
   _validateBody: (body) =>
     return @_createError 'Create Connector: requires a post body', 422 unless body?
     return @_createError 'Create Connector: requires githubSlug in post body', 422 unless body.githubSlug?
-    return @_createError 'Create Connector: requires version in post body', 422 unless body.version?
     return @_createError 'Create Connector: requires connector in post body', 422 unless body.connector?
     return @_createError 'Create Connector: requires type in post body', 422 unless body.type?
     return null

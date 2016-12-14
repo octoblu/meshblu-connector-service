@@ -2,8 +2,9 @@ _           = require 'lodash'
 MeshbluHttp = require 'meshblu-http'
 
 class UpgradeConnectorService
-  constructor: ({ @schemaService }) ->
+  constructor: ({ @schemaService, @connectorDetailService }) ->
     throw new Error 'UpgradeConnectorService: requires schemaService' unless @schemaService?
+    throw new Error 'UpgradeConnectorService: requires connectorDetailService' unless @connectorDetailService?
 
   do: ({ body, uuid, meshbluAuth, owner }, callback) =>
     validationError = @_validateBody body
@@ -15,11 +16,13 @@ class UpgradeConnectorService
       body = @_createUpdateBody { device, body }
       validationError = @_validateUpdateBody body
       return callback validationError if validationError?
-      @schemaService.get { githubSlug, version }, (error, schemas) =>
+      @connectorDetailService.getLatestTag { version, githubSlug }, (error, version) =>
         return callback error if error?
-        @_createStatusDevice { device, owner, meshbluHttp }, (error, statusDevice) =>
+        @schemaService.get { githubSlug, version }, (error, schemas) =>
           return callback error if error?
-          @_updateDevice { statusDevice, uuid, body, schemas, meshbluHttp }, callback
+          @_createStatusDevice { device, owner, meshbluHttp }, (error, statusDevice) =>
+            return callback error if error?
+            @_updateDevice { statusDevice, version, uuid, body, schemas, meshbluHttp }, callback
 
   _getConnectorDevice: ({ uuid, meshbluHttp }, callback) =>
     meshbluHttp.device uuid, callback
@@ -37,8 +40,8 @@ class UpgradeConnectorService
     }
     meshbluHttp.register properties, callback
 
-  _updateDevice: ({ uuid, statusDevice, body, schemas, meshbluHttp }, callback) =>
-    { githubSlug, name, version, connector, type } = body
+  _updateDevice: ({ uuid, version, statusDevice, body, schemas, meshbluHttp }, callback) =>
+    { githubSlug, name, connector, type } = body
     { registryItem, iconUri } = body
     properties = _.defaultsDeep {
       type
@@ -65,7 +68,6 @@ class UpgradeConnectorService
 
   _validateBody: (body) =>
     return @_createError 'Upgrade Connector: requires a post body', 422 unless body?
-    return @_createError 'Upgrade Connector: requires version in post body', 422 unless body.version?
     return null
 
   _validateUpdateBody: (body) =>
