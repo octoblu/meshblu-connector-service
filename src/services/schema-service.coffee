@@ -35,7 +35,7 @@ class SchemaService
     return 'Default' if schemas.configure.Default?
     return 'default' if schemas.configure.default?
 
-  _createError: (code, message) =>
+  _createError: (message, code) =>
     error = new Error message
     error.code = code if code?
     return error

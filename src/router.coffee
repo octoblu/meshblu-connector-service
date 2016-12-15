@@ -16,5 +16,6 @@ class Router
     app.post '/users/:owner/connectors', meshbluConnectorController.create
     app.put '/users/:owner/connectors/:uuid', meshbluConnectorController.upgrade
     app.get '/connectors/:owner/:connector/:version/schemas', meshbluConnectorController.getSchemas
+    app.post '/connectors/default-options', meshbluConnectorController.getDefaultOptions
 
 module.exports = Router

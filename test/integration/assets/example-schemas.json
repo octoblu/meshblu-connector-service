@@ -1,27 +1,326 @@
 {
-  "schemas": {
-    "configure": {
-      "Default": {
-        "properties": {
-          "options": {
-            "properties": {
-              "greeting": {
-                "default": "Howdy",
-                "title": "Greeting String",
-                "type": "string"
-              }
+  "someSchema": {
+    "schemas": {
+      "configure": {
+        "SomeSchema": {
+          "properties": {
+            "options": {
+              "properties": {
+                "greeting": {
+                  "default": "Howdy",
+                  "title": "Greeting String",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "greeting"
+              ],
+              "title": "Options",
+              "type": "object"
+            }
+          },
+          "title": "Some Schema Configuration",
+          "type": "object"
+        }
+      },
+      "version": "2.0.0"
+    }
+  },
+  "DefaultSchema": {
+    "schemas": {
+      "configure": {
+        "Default": {
+          "properties": {
+            "options": {
+              "properties": {
+                "color": {
+                  "default": "blueish-green-yellow-maybe",
+                  "title": "Color String",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "greeting"
+              ],
+              "title": "Options",
+              "type": "object"
+            }
+          },
+          "title": "Default Configuration",
+          "type": "object"
+        },
+        "OtherSchema": {
+          "properties": {
+            "options": {
+              "properties": {
+                "other": {
+                  "default": "Yes",
+                  "title": "Other String",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "other"
+              ],
+              "title": "Options",
+              "type": "object"
+            }
+          },
+          "title": "Other Schema Configuration",
+          "type": "object"
+        }
+      },
+      "version": "2.0.0"
+    }
+  },
+  "defaultSchema": {
+    "schemas": {
+      "configure": {
+        "default": {
+          "properties": {
+            "options": {
+              "properties": {
+                "type": {
+                  "default": "is-default",
+                  "title": "Type String",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "greeting"
+              ],
+              "title": "Options",
+              "type": "object"
+            }
+          },
+          "title": "default Configuration",
+          "type": "object"
+        },
+        "OtherSchema": {
+          "properties": {
+            "options": {
+              "properties": {
+                "other": {
+                  "default": "Yes",
+                  "title": "Other String",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "other"
+              ],
+              "title": "Options",
+              "type": "object"
+            }
+          },
+          "title": "Other Schema Configuration",
+          "type": "object"
+        }
+      },
+      "version": "2.0.0"
+    }
+  },
+  "noDefaultSchema": {
+    "schemas": {
+      "configure": {
+        "Cool": {
+          "properties": {
+            "options": {
+              "properties": {
+                "name": {
+                  "default": "Milo",
+                  "title": "Name",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "title": "Options",
+              "type": "object"
+            }
+          },
+          "title": "Cool Configuration",
+          "type": "object"
+        },
+        "SuperCool": {
+          "properties": {
+            "options": {
+              "properties": {
+                "name": {
+                  "default": "Peter",
+                  "title": "Name",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "title": "Options",
+              "type": "object"
+            }
+          },
+          "title": "Super Cool Configuration",
+          "type": "object"
+        }
+      },
+      "version": "2.0.0"
+    }
+  },
+  "skypeSchema": {
+    "schemas": {
+      "configure": {
+        "Default": {
+          "properties": {
+            "desiredState": {
+              "properties": {
+                "audioEnabled": {
+                  "default": false,
+                  "title": "Enable Audio",
+                  "type": "boolean"
+                },
+                "meeting": {
+                  "properties": {
+                    "url": {
+                      "title": "Meeting Url",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "videoEnabled": {
+                  "default": false,
+                  "title": "Enable Video",
+                  "type": "boolean"
+                }
+              },
+              "title": "Desired State",
+              "type": "object"
+            }
+          },
+          "title": "Default Configuration",
+          "type": "object"
+        }
+      },
+      "version": "2.0.0"
+    }
+  },
+  "hueLightSchema": {
+    "schemas": {
+      "configure": {
+        "Advanced": {
+          "properties": {
+            "desiredState": {
+              "properties": {
+                "alert": {
+                  "title": "Alert Effect",
+                  "type": "string"
+                },
+                "color": {
+                  "title": "Color",
+                  "type": "string"
+                },
+                "effect": {
+                  "title": "Dynamic Effect",
+                  "type": "string"
+                },
+                "on": {
+                  "title": "Light On",
+                  "type": "boolean"
+                },
+                "transitiontime": {
+                  "minimum": 0,
+                  "title": "Transition Time (in milliseconds)",
+                  "type": "integer"
+                }
+              },
+              "title": "Desired State",
+              "type": "object"
+            },
+            "options": {
+              "properties": {
+                "apiUsername": {
+                  "default": "newdeveloper",
+                  "title": "API Username",
+                  "type": "string"
+                },
+                "ipAddress": {
+                  "title": "Bridge IP Address",
+                  "type": "string"
+                },
+                "lightNumber": {
+                  "default": 0,
+                  "minimum": 0,
+                  "title": "Light Number",
+                  "type": "integer"
+                }
+              },
+              "title": "Options",
+              "type": "object"
             },
             "required": [
-              "greeting"
-            ],
-            "title": "Options",
-            "type": "object"
+              "lightNumber",
+              "apiUsername"
+            ]
+          },
+          "title": "Advanced Configuration",
+          "type": "object",
+          "x-form-schema": {
+            "angular": "configure.Advanced.angular"
           }
         },
-        "title": "Default Configuration",
-        "type": "object"
+        "Default": {
+          "properties": {
+            "desiredState": {
+              "properties": {
+                "alert": {
+                  "title": "Alert Effect",
+                  "type": "string"
+                },
+                "color": {
+                  "title": "Color",
+                  "type": "string"
+                },
+                "effect": {
+                  "title": "Dynamic Effect",
+                  "type": "string"
+                },
+                "on": {
+                  "title": "Light On",
+                  "type": "boolean"
+                },
+                "transitiontime": {
+                  "minimum": 0,
+                  "title": "Transition Time (in milliseconds)",
+                  "type": "integer"
+                }
+              },
+              "title": "Desired State",
+              "type": "object"
+            },
+            "options": {
+              "properties": {
+                "lightNumber": {
+                  "default": 0,
+                  "minimum": 0,
+                  "title": "Light Number",
+                  "type": "integer"
+                }
+              },
+              "title": "Options",
+              "type": "object"
+            },
+            "required": [
+              "lightNumber"
+            ]
+          },
+          "title": "Default Configuration",
+          "type": "object",
+          "x-form-schema": {
+            "angular": "configure.Default.angular"
+          }
+        }
       }
-    },
-    "version": "2.0.0"
+    }
   }
 }

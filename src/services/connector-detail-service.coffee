@@ -18,7 +18,7 @@ class ConnectorDetailService
       return callback @_createError('No latest tag', 404) unless foundTag?
       callback null, foundTag
 
-  _createError: (code, message) =>
+  _createError: (message, code) =>
     error = new Error message
     error.code = code if code?
     return error
