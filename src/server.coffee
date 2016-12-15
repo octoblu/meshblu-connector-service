@@ -24,11 +24,11 @@ class Server
     app.use meshbluAuth.auth()
     app.use meshbluAuth.gateway()
 
-    schemaService = new SchemaService { @fileDownloaderUrl }
     connectorDetailService = new ConnectorDetailService { @connectorDetailUrl }
+    schemaService = new SchemaService { @fileDownloaderUrl, connectorDetailService }
     upgradeConnectorService = new UpgradeConnectorService { schemaService, connectorDetailService }
     createConnectorService = new CreateConnectorService { schemaService, connectorDetailService }
-    router = new Router {@meshbluConfig,upgradeConnectorService,createConnectorService}
+    router = new Router {@meshbluConfig,upgradeConnectorService,createConnectorService,schemaService}
 
     router.route app
 

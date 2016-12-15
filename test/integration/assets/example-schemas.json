@@ -1,0 +1,27 @@
+{
+  "schemas": {
+    "configure": {
+      "Default": {
+        "properties": {
+          "options": {
+            "properties": {
+              "greeting": {
+                "default": "Howdy",
+                "title": "Greeting String",
+                "type": "string"
+              }
+            },
+            "required": [
+              "greeting"
+            ],
+            "title": "Options",
+            "type": "object"
+          }
+        },
+        "title": "Default Configuration",
+        "type": "object"
+      }
+    },
+    "version": "2.0.0"
+  }
+}

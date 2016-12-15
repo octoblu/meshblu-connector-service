@@ -3,18 +3,21 @@ request            = require 'request'
 jsonSchemaDefaults = require 'json-schema-defaults'
 
 class SchemaService
-  constructor: ({ @fileDownloaderUrl }) ->
-    throw new Error 'SchemaService: requires fileDownloaderUrl' unless @fileDownloaderUrl
+  constructor: ({ @fileDownloaderUrl, @connectorDetailService }) ->
+    throw new Error 'SchemaService: requires fileDownloaderUrl' unless @fileDownloaderUrl?
+    throw new Error 'SchemaService: requires connectorDetailService' unless @connectorDetailService?
 
   get: ({ githubSlug, version }, callback) =>
-    request.get {
-      baseUrl: @fileDownloaderUrl
-      uri: "/github-release/#{githubSlug}/#{version}/schemas.json"
-      json: true
-    }, (error, response, body) =>
+    @connectorDetailService.getLatestTag { githubSlug, version }, (error, version) =>
       return callback error if error?
-      return callback @_createError('Invalid fetch schema response', response.statusCode) if response.statusCode > 399
-      callback null, _.get(body, 'schemas', {})
+      request.get {
+        baseUrl: @fileDownloaderUrl
+        uri: "/github-release/#{githubSlug}/#{version}/schemas.json"
+        json: true
+      }, (error, response, body) =>
+        return callback error if error?
+        return callback @_createError('Invalid fetch schema response', response.statusCode) if response.statusCode > 399
+        callback null, _.get(body, 'schemas', {})
 
   defaultOptions: ({ schemas }) =>
     key = @getDefaultSchemaKey({ schemas })
