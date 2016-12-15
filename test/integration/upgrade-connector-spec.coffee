@@ -47,6 +47,14 @@ describe 'Upgrade Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
+        @resolveVersion = @connectorDetailService
+          .get '/github/some-owner/some-meshblu-connector'
+          .reply 200, {
+            tags: {
+              'v2.0.0': {}
+            }
+          }
+
         @getDevice = @meshblu
           .get '/v2/devices/some-device-uuid'
           .set 'Authorization', "Basic #{userAuth}"
@@ -124,6 +132,9 @@ describe 'Upgrade Connector', ->
       it 'should auth the request with meshblu', ->
         @authDevice.done()
 
+      it 'should resolve the version', ->
+        @resolveVersion.done()
+        
       it 'should get the schema', ->
         @getSchemas.done()
 
@@ -145,7 +156,7 @@ describe 'Upgrade Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @getLatestTag = @connectorDetailService
+        @resolveVersion = @connectorDetailService
           .get '/github/some-owner/some-meshblu-connector'
           .reply 200, {
             latest: {
@@ -232,7 +243,7 @@ describe 'Upgrade Connector', ->
         @getDevice.done()
 
       it 'should get the latest tag', ->
-        @getLatestTag.done()
+        @resolveVersion.done()
 
       it 'should not create the status device in meshblu', ->
         expect(@createStatusDevice.isDone).to.be.false

@@ -16,7 +16,7 @@ class UpgradeConnectorService
       body = @_createUpdateBody { device, body }
       validationError = @_validateUpdateBody body
       return callback validationError if validationError?
-      @connectorDetailService.getLatestTag { version, githubSlug }, (error, version) =>
+      @connectorDetailService.resolveVersion { version, githubSlug }, (error, version) =>
         return callback error if error?
         @schemaService.get { githubSlug, version }, (error, schemas) =>
           return callback error if error?

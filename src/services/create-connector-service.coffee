@@ -10,9 +10,9 @@ class CreateConnectorService
     validationError = @_validateBody body
     return callback(validationError) if validationError?
     { githubSlug, version } = body
-    @connectorDetailService.getLatestTag { version, githubSlug }, (error, version) =>
+    meshbluHttp = new MeshbluHttp meshbluAuth
+    @connectorDetailService.resolveVersion { version, githubSlug }, (error, version) =>
       return callback error if error?
-      meshbluHttp = new MeshbluHttp meshbluAuth
       @schemaService.get { githubSlug, version }, (error, schemas) =>
         return callback error if error?
         @_createConnectorDevice { owner, body, version, meshbluHttp, schemas }, (error, device) =>

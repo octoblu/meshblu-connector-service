@@ -28,7 +28,13 @@ class Server
     schemaService = new SchemaService { @fileDownloaderUrl, connectorDetailService }
     upgradeConnectorService = new UpgradeConnectorService { schemaService, connectorDetailService }
     createConnectorService = new CreateConnectorService { schemaService, connectorDetailService }
-    router = new Router {@meshbluConfig,upgradeConnectorService,createConnectorService,schemaService}
+    router = new Router {
+      @meshbluConfig,
+      upgradeConnectorService,
+      createConnectorService,
+      schemaService,
+      connectorDetailService,
+    }
 
     router.route app
 

@@ -39,7 +39,7 @@ describe 'Get Default Options', ->
     @meshblu.destroy()
     @server.destroy()
 
-  describe 'On POST /connectors/default-options', ->
+  describe 'On POST /schemas/default-options', ->
     describe 'when there is only one configure schema', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
@@ -50,7 +50,7 @@ describe 'Get Default Options', ->
           .reply 204
 
         options =
-          uri: '/connectors/default-options'
+          uri: '/schemas/default-options'
           baseUrl: "http://localhost:#{@serverPort}"
           auth:
             username: 'some-uuid'
@@ -86,7 +86,7 @@ describe 'Get Default Options', ->
             .reply 204
 
           options =
-            uri: '/connectors/default-options'
+            uri: '/schemas/default-options'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -121,7 +121,7 @@ describe 'Get Default Options', ->
             .reply 204
 
           options =
-            uri: '/connectors/default-options'
+            uri: '/schemas/default-options'
             baseUrl: "http://localhost:#{@serverPort}"
             auth:
               username: 'some-uuid'
@@ -156,7 +156,7 @@ describe 'Get Default Options', ->
           .reply 204
 
         options =
-          uri: '/connectors/default-options'
+          uri: '/schemas/default-options'
           baseUrl: "http://localhost:#{@serverPort}"
           auth:
             username: 'some-uuid'
@@ -193,7 +193,7 @@ describe 'Get Default Options', ->
           .reply 204
 
         options =
-          uri: '/connectors/default-options'
+          uri: '/schemas/default-options'
           baseUrl: "http://localhost:#{@serverPort}"
           auth:
             username: 'some-uuid'
@@ -229,7 +229,7 @@ describe 'Get Default Options', ->
           .reply 204
 
         options =
-          uri: '/connectors/default-options'
+          uri: '/schemas/default-options'
           baseUrl: "http://localhost:#{@serverPort}"
           auth:
             username: 'some-uuid'
@@ -258,7 +258,7 @@ describe 'Get Default Options', ->
           .reply 204
 
         options =
-          uri: '/connectors/default-options'
+          uri: '/schemas/default-options'
           baseUrl: "http://localhost:#{@serverPort}"
           auth:
             username: 'some-uuid'

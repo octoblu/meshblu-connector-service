@@ -49,6 +49,14 @@ describe 'Create Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
+        @resolveVersion = @connectorDetailService
+          .get '/github/some-owner/some-meshblu-connector'
+          .reply 200, {
+            tags: {
+              'v1.0.0': {}
+            }
+          }
+
         @getSchemas = @fileDownloadService
           .get '/github-release/some-owner/some-meshblu-connector/v1.0.0/schemas.json'
           .reply 200, {
@@ -152,6 +160,9 @@ describe 'Create Connector', ->
       it 'should auth the request with meshblu', ->
         @authDevice.done()
 
+      it 'should resolve the version', ->
+        @resolveVersion.done()
+
       it 'should get the schema', ->
         @getSchemas.done()
 
@@ -186,7 +197,7 @@ describe 'Create Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @getLatestTag = @connectorDetailService
+        @resolveVersion = @connectorDetailService
           .get '/github/some-owner/some-meshblu-connector'
           .reply 200, {
             latest: {
@@ -312,7 +323,7 @@ describe 'Create Connector', ->
         @getDeviceFinal.done()
 
       it 'should call the connector detail service to get the latest', ->
-        @getLatestTag.done()
+        @resolveVersion.done()
 
       it 'should return a 201', ->
         expect(@response.statusCode).to.equal 201, @body

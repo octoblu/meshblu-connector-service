@@ -8,16 +8,14 @@ class SchemaService
     throw new Error 'SchemaService: requires connectorDetailService' unless @connectorDetailService?
 
   get: ({ githubSlug, version }, callback) =>
-    @connectorDetailService.getLatestTag { githubSlug, version }, (error, version) =>
+    request.get {
+      baseUrl: @fileDownloaderUrl
+      uri: "/github-release/#{githubSlug}/#{version}/schemas.json"
+      json: true
+    }, (error, response, body) =>
       return callback error if error?
-      request.get {
-        baseUrl: @fileDownloaderUrl
-        uri: "/github-release/#{githubSlug}/#{version}/schemas.json"
-        json: true
-      }, (error, response, body) =>
-        return callback error if error?
-        return callback @_createError('Invalid fetch schema response', response.statusCode) if response.statusCode > 399
-        callback null, _.get(body, 'schemas', {})
+      return callback @_createError('Invalid fetch schema response', response.statusCode) if response.statusCode > 399
+      callback null, _.get(body, 'schemas', {})
 
   defaultOptions: ({ schemas }) =>
     key = @getDefaultSchemaKey({ schemas })
