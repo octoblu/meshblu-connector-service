@@ -30,6 +30,7 @@ class CreateConnectorService
   _createConnectorDevice: ({ owner, body, version, meshbluHttp, schemas }, callback) =>
     { name, connector, type, githubSlug } = body
     { registryItem, iconUri } = body
+    meshblu = _.get(body, 'meshblu', { domain: 'octoblu.com' })
     properties = _.defaultsDeep {
       type,
       connector,
@@ -42,7 +43,8 @@ class CreateConnectorService
       connectorMetadata: {
         version,
         githubSlug,
-        stopped: false
+        stopped: false,
+        meshblu,
       }
     }, @schemaService.defaultOptions({ schemas })
     _.set properties, 'name', name

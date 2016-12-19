@@ -98,6 +98,8 @@ describe 'Upgrade Connector', ->
             statusDevice: 'some-status-device-uuid'
             'connectorMetadata.version': 'v2.0.0',
             'connectorMetadata.githubSlug': 'some-owner/some-meshblu-connector',
+            'connectorMetadata.meshblu': { domain: 'some-domain' },
+            'octoblu.registryItem': { githubSlug: 'some-owner/some-meshblu-connector' }
             iconUri: 'some-icon-uri'
             schemas:
               configure:
@@ -105,8 +107,6 @@ describe 'Upgrade Connector', ->
                   properties:
                     hi:
                       type: 'bool'
-            'octoblu.registryItem':
-              githubSlug: 'some-owner/some-meshblu-connector'
           }
           .reply 204
 
@@ -122,6 +122,8 @@ describe 'Upgrade Connector', ->
             connector: 'some-meshblu-connector',
             version: 'v2.0.0'
             githubSlug: 'some-owner/some-meshblu-connector'
+            meshblu:
+              domain: 'some-domain'
 
         request.put options, (error, @response, @body) =>
           done error
@@ -134,7 +136,7 @@ describe 'Upgrade Connector', ->
 
       it 'should resolve the version', ->
         @resolveVersion.done()
-        
+
       it 'should get the schema', ->
         @getSchemas.done()
 

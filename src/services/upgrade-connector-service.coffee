@@ -42,7 +42,7 @@ class UpgradeConnectorService
 
   _updateDevice: ({ uuid, version, statusDevice, body, schemas, meshbluHttp }, callback) =>
     { githubSlug, name, connector, type } = body
-    { registryItem, iconUri } = body
+    { registryItem, iconUri, meshblu } = body
     properties = {
       type
       connector
@@ -50,6 +50,7 @@ class UpgradeConnectorService
       'connectorMetadata.githubSlug': githubSlug
       schemas
     }
+    properties['connectorMetadata.meshblu'] = meshblu if meshblu?
     _.set properties, 'iconUri', iconUri if iconUri?
     _.set properties, 'name', name if name?
     _.set properties, 'statusDevice', statusDevice.uuid if statusDevice?.uuid?

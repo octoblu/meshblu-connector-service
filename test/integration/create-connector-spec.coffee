@@ -96,6 +96,8 @@ describe 'Create Connector', ->
               version: 'v1.0.0',
               githubSlug: 'some-owner/some-meshblu-connector',
               stopped: false
+              meshblu:
+                domain: 'some-octoblu.com'
           }
           .reply 201, {
             uuid: 'some-device-uuid'
@@ -153,6 +155,8 @@ describe 'Create Connector', ->
             connector: 'some-meshblu-connector',
             version: 'v1.0.0'
             githubSlug: 'some-owner/some-meshblu-connector'
+            meshblu:
+              domain: 'some-octoblu.com'
 
         request.post options, (error, @response, @body) =>
           done error
@@ -244,6 +248,8 @@ describe 'Create Connector', ->
               version: 'v1.5.0',
               githubSlug: 'some-owner/some-meshblu-connector',
               stopped: false
+              meshblu:
+                domain: 'octoblu.com'
           }
           .reply 201, {
             uuid: 'some-device-uuid'

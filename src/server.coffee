@@ -9,7 +9,7 @@ UpgradeConnectorService = require './services/upgrade-connector-service'
 debug                   = require('debug')('meshblu-connector-service:server')
 
 class Server
-  constructor: ({@logFn, @disableLogging, @port, @meshbluConfig, @fileDownloaderUrl, @connectorDetailUrl})->
+  constructor: ({@logFn,@disableLogging,@port,@meshbluConfig,@fileDownloaderUrl,@connectorDetailUrl})->
     throw new Error 'Server: requires meshbluConfig' unless @meshbluConfig?
     throw new Error 'Server: requires fileDownloaderUrl' unless @fileDownloaderUrl?
     throw new Error 'Server: requires connectorDetailUrl' unless @connectorDetailUrl?
