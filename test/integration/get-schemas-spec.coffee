@@ -12,8 +12,8 @@ describe 'Get Schemas', ->
     @fileDownloadService = shmock 0xbabe
     enableDestroy @fileDownloadService
 
-    @connectorDetailService = shmock 0xdead
-    enableDestroy @connectorDetailService
+    @githubService = shmock 0xdead
+    enableDestroy @githubService
 
     @logFn = sinon.spy()
     serverOptions =
@@ -21,7 +21,8 @@ describe 'Get Schemas', ->
       disableLogging: true
       logFn: @logFn
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
-      connectorDetailUrl: "http://localhost:#{0xdead}"
+      githubApiUrl: "http://localhost:#{0xdead}"
+      githubToken: 'some-github-token'
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'
@@ -38,7 +39,7 @@ describe 'Get Schemas', ->
     @meshblu.destroy()
     @server.destroy()
     @fileDownloadService.destroy()
-    @connectorDetailService.destroy()
+    @githubService.destroy()
 
   describe 'On GET /releases/:owner/:repo/:tag/schemas', ->
     describe 'when getting a specific version', ->
@@ -50,11 +51,12 @@ describe 'Get Schemas', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
-          .reply 200, {
-            tags: 'v1.0.0': {}
-          }
+        @resolveVersion = @githubService
+          .get '/repos/some-owner/some-meshblu-connector/releases'
+          .set 'Authorization', 'token some-github-token'
+          .reply 200, [
+            { tag_name: 'v1.0.0' }
+          ]
 
         @getSchemas = @fileDownloadService
           .get '/github-release/some-owner/some-meshblu-connector/v1.0.0/schemas.json'
@@ -95,11 +97,11 @@ describe 'Get Schemas', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
+        @resolveVersion = @githubService
+          .get "/repos/some-owner/some-meshblu-connector/releases/latest"
+          .set 'Authorization', 'token some-github-token'
           .reply 200, {
-            latest:
-              tag: 'v1.5.0'
+            tag_name: 'v1.5.0'
           }
 
         @getSchemas = @fileDownloadService
@@ -141,11 +143,12 @@ describe 'Get Schemas', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
-          .reply 200, {
-            tags: 'v13.13.13': {}
-          }
+        @resolveVersion = @githubService
+          .get '/repos/some-owner/some-meshblu-connector/releases'
+          .set 'Authorization', 'token some-github-token'
+          .reply 200, [
+            { tag_name: 'v13.13.13' }
+          ]
 
         @getSchemas = @fileDownloadService
           .get '/github-release/some-owner/some-meshblu-connector/v13.13.13/schemas.json'

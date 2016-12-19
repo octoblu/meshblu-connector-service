@@ -9,8 +9,8 @@ describe 'Resolve Version', ->
     @meshblu = shmock 0xd00d
     enableDestroy @meshblu
 
-    @connectorDetailService = shmock 0xdead
-    enableDestroy @connectorDetailService
+    @githubService = shmock 0xdead
+    enableDestroy @githubService
 
     @logFn = sinon.spy()
     serverOptions =
@@ -18,7 +18,8 @@ describe 'Resolve Version', ->
       disableLogging: true
       logFn: @logFn
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
-      connectorDetailUrl: "http://localhost:#{0xdead}"
+      githubApiUrl: "http://localhost:#{0xdead}"
+      githubToken: 'some-github-token'
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'
@@ -34,7 +35,7 @@ describe 'Resolve Version', ->
   afterEach ->
     @meshblu.destroy()
     @server.destroy()
-    @connectorDetailService.destroy()
+    @githubService.destroy()
 
   describe 'On GET /releases/:owner/:repo/:tag/version/resolve', ->
     describe 'when getting a specific version', ->
@@ -46,11 +47,12 @@ describe 'Resolve Version', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
-          .reply 200, {
-            tags: 'v1.0.0': {}
-          }
+        @resolveVersion = @githubService
+          .get '/repos/some-owner/some-meshblu-connector/releases'
+          .set 'Authorization', 'token some-github-token'
+          .reply 200, [
+            { tag_name: 'v1.0.0' }
+          ]
 
         options =
           uri: '/releases/some-owner/some-meshblu-connector/v1.0.0/version/resolve'
@@ -84,11 +86,11 @@ describe 'Resolve Version', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
+        @resolveVersion = @githubService
+          .get "/repos/some-owner/some-meshblu-connector/releases/latest"
+          .set 'Authorization', 'token some-github-token'
           .reply 200, {
-            latest:
-              tag: 'v2.0.0'
+            tag_name: 'v2.0.0'
           }
 
         options =
@@ -123,11 +125,12 @@ describe 'Resolve Version', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
-          .reply 200, {
-            tags: 'v1.0.0': {}
-          }
+        @resolveVersion = @githubService
+          .get '/repos/some-owner/some-meshblu-connector/releases'
+          .set 'Authorization', 'token some-github-token'
+          .reply 200, [
+            { tag_name: 'v1.0.0' }
+          ]
 
         options =
           uri: '/releases/some-owner/some-meshblu-connector/v13.13.13/version/resolve'
@@ -158,11 +161,12 @@ describe 'Resolve Version', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
-          .reply 200, {
-            tags: 'v1.0.0': {prerelease: true}
-          }
+        @resolveVersion = @githubService
+          .get '/repos/some-owner/some-meshblu-connector/releases'
+          .set 'Authorization', 'token some-github-token'
+          .reply 200, [
+            { tag_name: 'v1.0.0', prerelease: true }
+          ]
 
         options =
           uri: '/releases/some-owner/some-meshblu-connector/v1.0.0/version/resolve'
@@ -196,11 +200,12 @@ describe 'Resolve Version', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
-          .reply 200, {
-            tags: 'v1.0.0': {draft: true}
-          }
+        @resolveVersion = @githubService
+          .get '/repos/some-owner/some-meshblu-connector/releases'
+          .set 'Authorization', 'token some-github-token'
+          .reply 200, [
+            { tag_name: 'v1.0.0', draft: true }
+          ]
 
         options =
           uri: '/releases/some-owner/some-meshblu-connector/v1.0.0/version/resolve'

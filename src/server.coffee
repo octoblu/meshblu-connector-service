@@ -9,10 +9,13 @@ UpgradeConnectorService = require './services/upgrade-connector-service'
 debug                   = require('debug')('meshblu-connector-service:server')
 
 class Server
-  constructor: ({@logFn,@disableLogging,@port,@meshbluConfig,@fileDownloaderUrl,@connectorDetailUrl})->
+  constructor: (options) ->
+    {@logFn,@disableLogging,@port,@meshbluConfig} = options
+    {@fileDownloaderUrl,@githubToken,@githubApiUrl} = options
     throw new Error 'Server: requires meshbluConfig' unless @meshbluConfig?
     throw new Error 'Server: requires fileDownloaderUrl' unless @fileDownloaderUrl?
-    throw new Error 'Server: requires connectorDetailUrl' unless @connectorDetailUrl?
+    throw new Error 'Server: requires githubToken' unless @githubToken?
+    throw new Error 'Server: requires githubApiUrl' unless @githubApiUrl?
 
   address: =>
     @server.address()
@@ -24,7 +27,7 @@ class Server
     app.use meshbluAuth.auth()
     app.use meshbluAuth.gateway()
 
-    connectorDetailService = new ConnectorDetailService { @connectorDetailUrl }
+    connectorDetailService = new ConnectorDetailService { @githubToken, @githubApiUrl }
     schemaService = new SchemaService { @fileDownloaderUrl, connectorDetailService }
     upgradeConnectorService = new UpgradeConnectorService { schemaService, connectorDetailService }
     createConnectorService = new CreateConnectorService { schemaService, connectorDetailService }

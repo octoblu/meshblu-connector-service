@@ -22,7 +22,8 @@ describe 'Get Default Options', ->
       disableLogging: true
       logFn: @logFn
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
-      connectorDetailUrl: "http://localhost:#{0xdead}"
+      githubApiUrl: "http://localhost:#{0xdead}"
+      githubToken: 'some-github-token'
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'

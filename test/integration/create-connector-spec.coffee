@@ -11,8 +11,8 @@ describe 'Create Connector', ->
     @fileDownloadService = shmock 0xbabe
     enableDestroy @fileDownloadService
 
-    @connectorDetailService = shmock 0xdead
-    enableDestroy @connectorDetailService
+    @githubService = shmock 0xdead
+    enableDestroy @githubService
 
     @logFn = sinon.spy()
     serverOptions =
@@ -20,7 +20,8 @@ describe 'Create Connector', ->
       disableLogging: true
       logFn: @logFn
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
-      connectorDetailUrl: "http://localhost:#{0xdead}"
+      githubApiUrl: "http://localhost:#{0xdead}"
+      githubToken: 'some-github-token'
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'
@@ -37,7 +38,7 @@ describe 'Create Connector', ->
     @meshblu.destroy()
     @server.destroy()
     @fileDownloadService.destroy()
-    @connectorDetailService.destroy()
+    @githubService.destroy()
 
   describe 'On POST /users/some-owner/connectors', ->
     describe 'when getting a specific version', ->
@@ -49,13 +50,12 @@ describe 'Create Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
-          .reply 200, {
-            tags: {
-              'v1.0.0': {}
-            }
-          }
+        @resolveVersion = @githubService
+          .get '/repos/some-owner/some-meshblu-connector/releases'
+          .set 'Authorization', 'token some-github-token'
+          .reply 200, [
+            { tag_name: 'v1.0.0' }
+          ]
 
         @getSchemas = @fileDownloadService
           .get '/github-release/some-owner/some-meshblu-connector/v1.0.0/schemas.json'
@@ -160,6 +160,17 @@ describe 'Create Connector', ->
 
         request.post options, (error, @response, @body) =>
           done error
+        return
+
+      it 'should return a 201', ->
+        expect(@response.statusCode).to.equal 201, @body
+
+      it 'should have the device creation response', ->
+        expect(@body).to.deep.equal {
+          uuid: 'some-device-uuid'
+          device: 'response'
+          fake: true
+        }
 
       it 'should auth the request with meshblu', ->
         @authDevice.done()
@@ -182,16 +193,6 @@ describe 'Create Connector', ->
       it 'should get the device and return it', ->
         @getDeviceFinal.done()
 
-      it 'should return a 201', ->
-        expect(@response.statusCode).to.equal 201, @body
-
-      it 'should have the device creation response', ->
-        expect(@body).to.deep.equal {
-          uuid: 'some-device-uuid'
-          device: 'response'
-          fake: true
-        }
-
     describe 'when getting the latest', ->
       beforeEach (done) ->
         userAuth = new Buffer('some-uuid:some-token').toString 'base64'
@@ -201,12 +202,11 @@ describe 'Create Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
+        @resolveVersion = @githubService
+          .get "/repos/some-owner/some-meshblu-connector/releases/latest"
+          .set 'Authorization', 'token some-github-token'
           .reply 200, {
-            latest: {
-              tag: 'v1.5.0'
-            }
+            tag_name: 'v1.5.0'
           }
 
         @getSchemas = @fileDownloadService
@@ -310,6 +310,16 @@ describe 'Create Connector', ->
         request.post options, (error, @response, @body) =>
           done error
 
+      it 'should return a 201', ->
+        expect(@response.statusCode).to.equal 201, @body
+
+      it 'should have the device creation response', ->
+        expect(@body).to.deep.equal {
+          uuid: 'some-device-uuid'
+          device: 'response'
+          fake: true
+        }
+
       it 'should auth the request with meshblu', ->
         @authDevice.done()
 
@@ -331,15 +341,6 @@ describe 'Create Connector', ->
       it 'should call the connector detail service to get the latest', ->
         @resolveVersion.done()
 
-      it 'should return a 201', ->
-        expect(@response.statusCode).to.equal 201, @body
-
-      it 'should have the device creation response', ->
-        expect(@body).to.deep.equal {
-          uuid: 'some-device-uuid'
-          device: 'response'
-          fake: true
-        }
 
     describe 'when it fails validation', ->
       describe 'when missing the githubSlug', ->

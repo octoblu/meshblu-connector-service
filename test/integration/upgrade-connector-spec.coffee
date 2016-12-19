@@ -9,8 +9,8 @@ describe 'Upgrade Connector', ->
     enableDestroy @meshblu
     @fileDownloadService = shmock 0xbabe
     enableDestroy @fileDownloadService
-    @connectorDetailService = shmock 0xdead
-    enableDestroy @connectorDetailService
+    @githubService = shmock 0xdead
+    enableDestroy @githubService
 
     @logFn = sinon.spy()
     serverOptions =
@@ -18,7 +18,8 @@ describe 'Upgrade Connector', ->
       disableLogging: true
       logFn: @logFn
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
-      connectorDetailUrl: "http://localhost:#{0xdead}"
+      githubApiUrl: "http://localhost:#{0xdead}"
+      githubToken: 'some-github-token'
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'
@@ -35,7 +36,7 @@ describe 'Upgrade Connector', ->
     @meshblu.destroy()
     @server.destroy()
     @fileDownloadService.destroy()
-    @connectorDetailService.destroy()
+    @githubService.destroy()
 
   describe 'On PUT /users/some-owner/connectors/:uuid', ->
     describe 'when it does not have a statusDevice', ->
@@ -47,13 +48,12 @@ describe 'Upgrade Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
-          .reply 200, {
-            tags: {
-              'v2.0.0': {}
-            }
-          }
+        @resolveVersion = @githubService
+          .get '/repos/some-owner/some-meshblu-connector/releases'
+          .set 'Authorization', 'token some-github-token'
+          .reply 200, [
+            { tag_name: 'v2.0.0' }
+          ]
 
         @getDevice = @meshblu
           .get '/v2/devices/some-device-uuid'
@@ -158,12 +158,11 @@ describe 'Upgrade Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
+        @resolveVersion = @githubService
+          .get '/repos/some-owner/some-meshblu-connector/releases/latest'
+          .set 'Authorization', 'token some-github-token'
           .reply 200, {
-            latest: {
-              tag: 'v2.5.0'
-            }
+            tag_name: 'v2.5.0'
           }
 
         @getDevice = @meshblu
