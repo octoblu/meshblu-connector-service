@@ -9,8 +9,8 @@ describe 'Upgrade Connector', ->
     enableDestroy @meshblu
     @fileDownloadService = shmock 0xbabe
     enableDestroy @fileDownloadService
-    @connectorDetailService = shmock 0xdead
-    enableDestroy @connectorDetailService
+    @githubService = shmock 0xdead
+    enableDestroy @githubService
 
     @logFn = sinon.spy()
     serverOptions =
@@ -18,7 +18,8 @@ describe 'Upgrade Connector', ->
       disableLogging: true
       logFn: @logFn
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
-      connectorDetailUrl: "http://localhost:#{0xdead}"
+      githubApiUrl: "http://localhost:#{0xdead}"
+      githubToken: 'some-github-token'
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'
@@ -35,7 +36,7 @@ describe 'Upgrade Connector', ->
     @meshblu.destroy()
     @server.destroy()
     @fileDownloadService.destroy()
-    @connectorDetailService.destroy()
+    @githubService.destroy()
 
   describe 'On PUT /users/some-owner/connectors/:uuid', ->
     describe 'when it does not have a statusDevice', ->
@@ -47,7 +48,7 @@ describe 'Upgrade Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
+        @resolveVersion = @githubService
           .get '/github/some-owner/some-meshblu-connector'
           .reply 200, {
             tags: {
@@ -134,7 +135,7 @@ describe 'Upgrade Connector', ->
 
       it 'should resolve the version', ->
         @resolveVersion.done()
-        
+
       it 'should get the schema', ->
         @getSchemas.done()
 
@@ -156,7 +157,7 @@ describe 'Upgrade Connector', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
+        @resolveVersion = @githubService
           .get '/github/some-owner/some-meshblu-connector'
           .reply 200, {
             latest: {

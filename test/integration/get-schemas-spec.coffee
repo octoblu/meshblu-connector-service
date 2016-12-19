@@ -12,8 +12,8 @@ describe 'Get Schemas', ->
     @fileDownloadService = shmock 0xbabe
     enableDestroy @fileDownloadService
 
-    @connectorDetailService = shmock 0xdead
-    enableDestroy @connectorDetailService
+    @githubService = shmock 0xdead
+    enableDestroy @githubService
 
     @logFn = sinon.spy()
     serverOptions =
@@ -21,7 +21,8 @@ describe 'Get Schemas', ->
       disableLogging: true
       logFn: @logFn
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
-      connectorDetailUrl: "http://localhost:#{0xdead}"
+      githubApiUrl: "http://localhost:#{0xdead}"
+      githubToken: 'some-github-token'
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'
@@ -38,7 +39,7 @@ describe 'Get Schemas', ->
     @meshblu.destroy()
     @server.destroy()
     @fileDownloadService.destroy()
-    @connectorDetailService.destroy()
+    @githubService.destroy()
 
   describe 'On GET /releases/:owner/:repo/:tag/schemas', ->
     describe 'when getting a specific version', ->
@@ -50,7 +51,7 @@ describe 'Get Schemas', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
+        @resolveVersion = @githubService
           .get '/github/some-owner/some-meshblu-connector'
           .reply 200, {
             tags: 'v1.0.0': {}
@@ -95,11 +96,10 @@ describe 'Get Schemas', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
-          .get '/github/some-owner/some-meshblu-connector'
+        @resolveVersion = @githubService
+          .get "/repos/some-owner/some-meshblu-connector/releases/latest"
           .reply 200, {
-            latest:
-              tag: 'v1.5.0'
+            tag_name: 'v1.5.0'
           }
 
         @getSchemas = @fileDownloadService
@@ -141,7 +141,7 @@ describe 'Get Schemas', ->
           .set 'Authorization', "Basic #{userAuth}"
           .reply 204
 
-        @resolveVersion = @connectorDetailService
+        @resolveVersion = @githubService
           .get '/github/some-owner/some-meshblu-connector'
           .reply 200, {
             tags: 'v13.13.13': {}
