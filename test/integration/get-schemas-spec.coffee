@@ -17,7 +17,7 @@ describe 'Get Schemas', ->
 
     @logFn = sinon.spy()
     serverOptions =
-      port: null,
+      port: undefined,
       disableLogging: true
       logFn: @logFn
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
