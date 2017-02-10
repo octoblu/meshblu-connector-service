@@ -1,7 +1,7 @@
 {describe,beforeEach,afterEach,it} = global
 {expect}      = require 'chai'
 sinon         = require 'sinon'
-shmock        = require 'shmock'
+shmock        = require '@octoblu/shmock'
 request       = require 'request'
 enableDestroy = require 'server-destroy'
 Server        = require '../../src/server'
@@ -23,7 +23,7 @@ describe 'Upgrade Connector', ->
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
       githubApiUrl: "http://localhost:#{0xdead}"
       githubToken: 'some-github-token'
-      meshbluOTPUrl: 'some-otp-url'
+      meshbluOtpUrl: 'some-otp-url'
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'

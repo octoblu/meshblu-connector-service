@@ -1,6 +1,6 @@
 {
   "name": "meshblu-connector-service",
-  "version": "3.1.1",
+  "version": "4.0.0",
   "description": "meshblu-connector-service an Octoblu Service",
   "keywords": [
     "Octoblu",
@@ -25,6 +25,7 @@
     "test:watch": "mocha -w -R mocha-multi --reporter-options spec=-,mocha-osx-reporter=-"
   },
   "devDependencies": {
+    "@octoblu/shmock": "^0.9.1",
     "chai": "^3.5.0",
     "chai-subset": "^1.4.0",
     "env-test": "^1.0.0",
@@ -32,7 +33,6 @@
     "mocha-multi": "^0.10.0",
     "mocha-osx-reporter": "^0.1.2",
     "nyc": "^10.1.2",
-    "shmock": "^0.8.1",
     "sinon": "^1.17.7",
     "sinon-chai": "^2.8.0"
   },

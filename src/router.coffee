@@ -25,6 +25,6 @@ class Router
     app.get '/releases/:owner/:repo/:version/schemas', meshbluConnectorController.getSchemas
     app.get '/releases/:owner/:repo/:version/version/resolve', meshbluConnectorController.resolveVersion
     app.post '/schemas/default-options', meshbluConnectorController.getDefaultOptions
-    app.post '/connectors/:uuid/otp', meshbluConnectorController.generateOTP
+    app.post '/connectors/:uuid/otp', meshbluConnectorController.generateOtp
 
 module.exports = Router

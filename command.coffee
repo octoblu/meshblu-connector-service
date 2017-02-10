@@ -1,4 +1,3 @@
-_              = require 'lodash'
 envalid        = require 'envalid'
 MeshbluConfig  = require 'meshblu-config'
 SigtermHandler = require 'sigterm-handler'
@@ -10,7 +9,8 @@ class Command
       PORT: envalid.num({ default: 80, devDefault: 3000 })
       DISABLE_LOGGING: envalid.bool({ default: false })
       FILE_DOWNLOADER_URL: envalid.url({ default: 'https://file-downloader.octoblu.com' })
-      GITHUB_API_URL: envalid.url({ default: 'https://api.github.com/' })
+      GITHUB_API_URL: envalid.url({ default: 'https://api.github.com' })
+      MESHBLU_Otp_URL: envalid.url({ default: 'https://meshblu-otp.octoblu.com' })
       GITHUB_TOKEN: envalid.str()
     }
 
@@ -26,11 +26,12 @@ class Command
       fileDownloaderUrl : @env.FILE_DOWNLOADER_URL
       githubApiUrl      : @env.GITHUB_API_URL
       githubToken       : @env.GITHUB_TOKEN
+      meshbluOtpUrl     : @env.MESHBLU_Otp_URL
     }
     server.run (error) =>
       return @panic error if error?
 
-      {address,port} = server.address()
+      {port} = server.address()
       console.log "MeshbluConnectorService listening on port: #{port}"
 
     sigtermHandler = new SigtermHandler({ events: ['SIGINT', 'SIGTERM']})

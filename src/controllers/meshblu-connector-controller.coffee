@@ -33,12 +33,12 @@ class MeshbluConnectorController
     defaultOptions = @schemaService.defaultOptions { schemas }
     response.status(200).send defaultOptions
 
-  generateOTP: (request, response) =>
+  generateOtp: (request, response) =>
     { meshbluAuth } = request
     { uuid } = request.params
-    @otpService.generate { uuid, meshbluAuth }, (error, otpKey) =>
+    @otpService.generate { uuid, meshbluAuth }, (error, result) =>
       return response.sendError(error) if error?
-      response.status(201).send({ otpKey })
+      response.status(201).send(result)
 
   resolveVersion: (request, response) =>
     { owner, repo, version } = request.params

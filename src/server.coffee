@@ -7,19 +7,19 @@ Router                  = require './router'
   CreateConnectorService
   SchemaService
   UpgradeConnectorService
-  OTPService
+  OtpService
 }  = require './services'
 
 class Server
   constructor: (options) ->
     {@logFn,@disableLogging,@port,@meshbluConfig} = options
     {@fileDownloaderUrl,@githubToken,@githubApiUrl} = options
-    {@meshbluOTPUrl} = options
+    {@meshbluOtpUrl} = options
     throw new Error 'Server: requires meshbluConfig' unless @meshbluConfig?
     throw new Error 'Server: requires fileDownloaderUrl' unless @fileDownloaderUrl?
     throw new Error 'Server: requires githubToken' unless @githubToken?
     throw new Error 'Server: requires githubApiUrl' unless @githubApiUrl?
-    throw new Error 'Server: requires meshbluOTPUrl' unless @meshbluOTPUrl?
+    throw new Error 'Server: requires meshbluOtpUrl' unless @meshbluOtpUrl?
 
   address: =>
     @server.address()
@@ -35,7 +35,7 @@ class Server
     schemaService = new SchemaService { @fileDownloaderUrl, connectorDetailService }
     upgradeConnectorService = new UpgradeConnectorService { schemaService, connectorDetailService }
     createConnectorService = new CreateConnectorService { schemaService, connectorDetailService }
-    otpService = new OTPService { @meshbluOTPUrl }
+    otpService = new OtpService { @meshbluOtpUrl, connectorDetailService }
     router = new Router {
       @meshbluConfig
       upgradeConnectorService
