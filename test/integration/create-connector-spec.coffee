@@ -25,6 +25,7 @@ describe 'Create Connector', ->
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
       githubApiUrl: "http://localhost:#{0xdead}"
       githubToken: 'some-github-token'
+      meshbluOTPUrl: 'some-otp-url'
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'

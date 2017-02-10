@@ -2,19 +2,24 @@ enableDestroy           = require 'server-destroy'
 octobluExpress          = require 'express-octoblu'
 MeshbluAuth             = require 'express-meshblu-auth'
 Router                  = require './router'
-SchemaService           = require './services/schema-service'
-ConnectorDetailService  = require './services/connector-detail-service'
-CreateConnectorService  = require './services/create-connector-service'
-UpgradeConnectorService = require './services/upgrade-connector-service'
+{
+  ConnectorDetailService
+  CreateConnectorService
+  SchemaService
+  UpgradeConnectorService
+  OTPService
+}  = require './services'
 
 class Server
   constructor: (options) ->
     {@logFn,@disableLogging,@port,@meshbluConfig} = options
     {@fileDownloaderUrl,@githubToken,@githubApiUrl} = options
+    {@meshbluOTPUrl} = options
     throw new Error 'Server: requires meshbluConfig' unless @meshbluConfig?
     throw new Error 'Server: requires fileDownloaderUrl' unless @fileDownloaderUrl?
     throw new Error 'Server: requires githubToken' unless @githubToken?
     throw new Error 'Server: requires githubApiUrl' unless @githubApiUrl?
+    throw new Error 'Server: requires meshbluOTPUrl' unless @meshbluOTPUrl?
 
   address: =>
     @server.address()
@@ -30,12 +35,14 @@ class Server
     schemaService = new SchemaService { @fileDownloaderUrl, connectorDetailService }
     upgradeConnectorService = new UpgradeConnectorService { schemaService, connectorDetailService }
     createConnectorService = new CreateConnectorService { schemaService, connectorDetailService }
+    otpService = new OTPService { @meshbluOTPUrl }
     router = new Router {
-      @meshbluConfig,
-      upgradeConnectorService,
-      createConnectorService,
-      schemaService,
-      connectorDetailService,
+      @meshbluConfig
+      upgradeConnectorService
+      createConnectorService
+      schemaService
+      connectorDetailService
+      otpService
     }
 
     router.route app
