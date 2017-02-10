@@ -6,7 +6,6 @@ SchemaService           = require './services/schema-service'
 ConnectorDetailService  = require './services/connector-detail-service'
 CreateConnectorService  = require './services/create-connector-service'
 UpgradeConnectorService = require './services/upgrade-connector-service'
-debug                   = require('debug')('meshblu-connector-service:server')
 
 class Server
   constructor: (options) ->

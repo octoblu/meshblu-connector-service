@@ -18,7 +18,7 @@ class MeshbluConnectorController
   upgrade: (request, response) =>
     { meshbluAuth, body } = request
     { owner, uuid } = request.params
-    @upgradeConnectorService.do { body, meshbluAuth, uuid, owner }, (error, device) =>
+    @upgradeConnectorService.do { body, meshbluAuth, uuid, owner }, (error) =>
       console.error('Upgrade Connector Error', error) if error?.code >= 500
       return response.sendError(error) if error?
       response.sendStatus(204)

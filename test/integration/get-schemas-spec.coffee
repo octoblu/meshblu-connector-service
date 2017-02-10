@@ -1,3 +1,6 @@
+{describe,beforeEach,afterEach,it} = global
+{expect}      = require 'chai'
+sinon         = require 'sinon'
 shmock         = require 'shmock'
 request        = require 'request'
 enableDestroy  = require 'server-destroy'
