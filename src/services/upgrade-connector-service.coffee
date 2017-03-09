@@ -51,6 +51,7 @@ class UpgradeConnectorService
       schemas
     }
     properties['connectorMetadata.meshblu'] = meshblu if meshblu?
+    iconUri ?= _.get registryItem, 'iconUri'
     _.set properties, 'iconUri', iconUri if iconUri?
     _.set properties, 'name', name if name?
     _.set properties, 'statusDevice', statusDevice.uuid if statusDevice?.uuid?

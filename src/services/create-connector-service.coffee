@@ -47,6 +47,7 @@ class CreateConnectorService
         meshblu,
       }
     }, @schemaService.defaultOptions({ schemas })
+    iconUri ?= _.get registryItem, 'iconUri'
     _.set properties, 'name', name
     _.set properties, 'iconUri', iconUri if iconUri?
     _.set properties, 'octoblu.registryItem', registryItem if registryItem?
