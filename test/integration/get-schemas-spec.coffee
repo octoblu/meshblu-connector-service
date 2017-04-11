@@ -69,16 +69,10 @@ describe 'Get Schemas', ->
         options =
           uri: '/releases/some-owner/some-meshblu-connector/v1.0.0/schemas'
           baseUrl: "http://localhost:#{@serverPort}"
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
           json: true
 
         request.get options, (error, @response, @body) =>
           done error
-
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
 
       it 'should resolve the version', ->
         @resolveVersion.done()
@@ -140,13 +134,6 @@ describe 'Get Schemas', ->
 
     describe 'when the schema is not found', ->
       beforeEach (done) ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-        @authDevice = @meshblu
-          .post '/authenticate'
-          .set 'Authorization', "Basic #{userAuth}"
-          .reply 204
-
         @resolveVersion = @githubService
           .get '/repos/some-owner/some-meshblu-connector/releases'
           .set 'Authorization', 'token some-github-token'
@@ -161,16 +148,10 @@ describe 'Get Schemas', ->
         options =
           uri: '/releases/some-owner/some-meshblu-connector/v13.13.13/schemas'
           baseUrl: "http://localhost:#{@serverPort}"
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
           json: true
 
         request.get options, (error, @response, @body) =>
           done error
-
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
 
       it 'should get the schema', ->
         @getSchemas.done()

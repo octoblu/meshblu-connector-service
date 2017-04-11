@@ -29,7 +29,6 @@ class Server
 
     meshbluAuth = new MeshbluAuth @meshbluConfig
     app.use meshbluAuth.auth()
-    app.use meshbluAuth.gateway()
 
     connectorDetailService = new ConnectorDetailService { @githubToken, @githubApiUrl }
     schemaService = new SchemaService { @fileDownloaderUrl, connectorDetailService }

@@ -4,7 +4,6 @@ sinon         = require 'sinon'
 shmock         = require '@octoblu/shmock'
 request        = require 'request'
 enableDestroy  = require 'server-destroy'
-{ someSchema } = require './assets/example-schemas.json'
 Server         = require '../../src/server'
 
 describe 'Resolve Version', ->
@@ -44,13 +43,6 @@ describe 'Resolve Version', ->
   describe 'On GET /releases/:owner/:repo/:tag/version/resolve', ->
     describe 'when getting a specific version', ->
       beforeEach (done) ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-        @authDevice = @meshblu
-          .post '/authenticate'
-          .set 'Authorization', "Basic #{userAuth}"
-          .reply 204
-
         @resolveVersion = @githubService
           .get '/repos/some-owner/some-meshblu-connector/releases'
           .set 'Authorization', 'token some-github-token'
@@ -61,16 +53,10 @@ describe 'Resolve Version', ->
         options =
           uri: '/releases/some-owner/some-meshblu-connector/v1.0.0/version/resolve'
           baseUrl: "http://localhost:#{@serverPort}"
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
           json: true
 
         request.get options, (error, @response, @body) =>
           done error
-
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
 
       it 'should resolve the version', ->
         @resolveVersion.done()
@@ -83,13 +69,6 @@ describe 'Resolve Version', ->
 
     describe 'when getting latest', ->
       beforeEach (done) ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-        @authDevice = @meshblu
-          .post '/authenticate'
-          .set 'Authorization', "Basic #{userAuth}"
-          .reply 204
-
         @resolveVersion = @githubService
           .get "/repos/some-owner/some-meshblu-connector/releases/latest"
           .set 'Authorization', 'token some-github-token'
@@ -100,16 +79,10 @@ describe 'Resolve Version', ->
         options =
           uri: '/releases/some-owner/some-meshblu-connector/latest/version/resolve'
           baseUrl: "http://localhost:#{@serverPort}"
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
           json: true
 
         request.get options, (error, @response, @body) =>
           done error
-
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
 
       it 'should resolve the version', ->
         @resolveVersion.done()
@@ -122,13 +95,6 @@ describe 'Resolve Version', ->
 
     describe 'when the version does not exist', ->
       beforeEach (done) ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-        @authDevice = @meshblu
-          .post '/authenticate'
-          .set 'Authorization', "Basic #{userAuth}"
-          .reply 204
-
         @resolveVersion = @githubService
           .get '/repos/some-owner/some-meshblu-connector/releases'
           .set 'Authorization', 'token some-github-token'
@@ -139,16 +105,10 @@ describe 'Resolve Version', ->
         options =
           uri: '/releases/some-owner/some-meshblu-connector/v13.13.13/version/resolve'
           baseUrl: "http://localhost:#{@serverPort}"
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
           json: true
 
         request.get options, (error, @response, @body) =>
           done error
-
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
 
       it 'should resolve the version', ->
         @resolveVersion.done()
@@ -158,13 +118,6 @@ describe 'Resolve Version', ->
 
     describe 'when the version is a prerelease', ->
       beforeEach (done) ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-        @authDevice = @meshblu
-          .post '/authenticate'
-          .set 'Authorization', "Basic #{userAuth}"
-          .reply 204
-
         @resolveVersion = @githubService
           .get '/repos/some-owner/some-meshblu-connector/releases'
           .set 'Authorization', 'token some-github-token'
@@ -175,16 +128,10 @@ describe 'Resolve Version', ->
         options =
           uri: '/releases/some-owner/some-meshblu-connector/v1.0.0/version/resolve'
           baseUrl: "http://localhost:#{@serverPort}"
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
           json: true
 
         request.get options, (error, @response, @body) =>
           done error
-
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
 
       it 'should resolve the version', ->
         @resolveVersion.done()
@@ -197,13 +144,6 @@ describe 'Resolve Version', ->
 
     describe 'when the version is a draft', ->
       beforeEach (done) ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-        @authDevice = @meshblu
-          .post '/authenticate'
-          .set 'Authorization', "Basic #{userAuth}"
-          .reply 204
-
         @resolveVersion = @githubService
           .get '/repos/some-owner/some-meshblu-connector/releases'
           .set 'Authorization', 'token some-github-token'
@@ -214,16 +154,10 @@ describe 'Resolve Version', ->
         options =
           uri: '/releases/some-owner/some-meshblu-connector/v1.0.0/version/resolve'
           baseUrl: "http://localhost:#{@serverPort}"
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
           json: true
 
         request.get options, (error, @response, @body) =>
           done error
-
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
 
       it 'should resolve the version', ->
         @resolveVersion.done()

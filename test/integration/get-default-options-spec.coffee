@@ -47,26 +47,13 @@ describe 'Get Default Options', ->
   describe 'On POST /schemas/default-options', ->
     describe 'when there is only one configure schema', ->
       beforeEach (done) ->
-        userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-        @authDevice = @meshblu
-          .post '/authenticate'
-          .set 'Authorization', "Basic #{userAuth}"
-          .reply 204
-
         options =
           uri: '/schemas/default-options'
           baseUrl: "http://localhost:#{@serverPort}"
-          auth:
-            username: 'some-uuid'
-            password: 'some-token'
           json: someSchema
 
         request.post options, (error, @response, @body) =>
           done error
-
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
 
       it 'should return a 200', ->
         expect(@response.statusCode).to.equal 200, @body
@@ -93,16 +80,10 @@ describe 'Get Default Options', ->
           options =
             uri: '/schemas/default-options'
             baseUrl: "http://localhost:#{@serverPort}"
-            auth:
-              username: 'some-uuid'
-              password: 'some-token'
             json: defaultSchema
 
           request.post options, (error, @response, @body) =>
             done error
-
-        it 'should auth the request with meshblu', ->
-          @authDevice.done()
 
         it 'should return a 200', ->
           expect(@response.statusCode).to.equal 200, @body
@@ -118,26 +99,13 @@ describe 'Get Default Options', ->
 
       describe 'when there is a "Default" schema', ->
         beforeEach (done) ->
-          userAuth = new Buffer('some-uuid:some-token').toString 'base64'
-
-          @authDevice = @meshblu
-            .post '/authenticate'
-            .set 'Authorization', "Basic #{userAuth}"
-            .reply 204
-
           options =
             uri: '/schemas/default-options'
             baseUrl: "http://localhost:#{@serverPort}"
-            auth:
-              username: 'some-uuid'
-              password: 'some-token'
             json: DefaultSchema
 
           request.post options, (error, @response, @body) =>
             done error
-
-        it 'should auth the request with meshblu', ->
-          @authDevice.done()
 
         it 'should return a 200', ->
           expect(@response.statusCode).to.equal 200, @body
@@ -170,9 +138,6 @@ describe 'Get Default Options', ->
 
         request.post options, (error, @response, @body) =>
           done error
-
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
 
       it 'should return a 200', ->
         expect(@response.statusCode).to.equal 200, @body
@@ -208,9 +173,6 @@ describe 'Get Default Options', ->
         request.post options, (error, @response, @body) =>
           done error
 
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
-
       it 'should return a 200', ->
         expect(@response.statusCode).to.equal 200, @body
 
@@ -244,9 +206,6 @@ describe 'Get Default Options', ->
         request.post options, (error, @response, @body) =>
           done error
 
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
-
       it 'should return a 200', ->
         expect(@response.statusCode).to.equal 200, @body
 
@@ -272,9 +231,6 @@ describe 'Get Default Options', ->
 
         request.post options, (error, @response, @body) =>
           done error
-
-      it 'should auth the request with meshblu', ->
-        @authDevice.done()
 
       it 'should return a 422', ->
         expect(@response.statusCode).to.equal 422, @body

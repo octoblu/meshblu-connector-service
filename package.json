@@ -1,6 +1,6 @@
 {
   "name": "meshblu-connector-service",
-  "version": "4.0.1",
+  "version": "5.0.0",
   "description": "meshblu-connector-service an Octoblu Service",
   "keywords": [
     "Octoblu",
@@ -27,26 +27,26 @@
   "devDependencies": {
     "@octoblu/shmock": "^0.9.1",
     "chai": "^3.5.0",
-    "chai-subset": "^1.4.0",
+    "chai-subset": "^1.5.0",
     "env-test": "^1.0.0",
     "mocha": "^3.0.2",
     "mocha-multi": "^0.10.0",
     "mocha-osx-reporter": "^0.1.2",
-    "nyc": "^10.1.2",
-    "sinon": "^1.17.7",
-    "sinon-chai": "^2.8.0"
+    "nyc": "^10.2.0",
+    "sinon": "^2.1.0",
+    "sinon-chai": "^2.9.0"
   },
   "dependencies": {
-    "coffee-script": "^1.12.3",
-    "debug": "^2.6.0",
+    "coffee-script": "^1.12.5",
+    "debug": "^2.6.3",
     "envalid": "^2.4.2",
-    "express-meshblu-auth": "^9.0.2",
-    "express-octoblu": "^3.0.0",
+    "express-meshblu-auth": "^9.1.0",
+    "express-octoblu": "^3.0.1",
     "json-schema-defaults": "^0.3.0",
     "lodash": "^4.17.4",
-    "meshblu-config": "^6.4.3",
-    "meshblu-http": "^9.5.0",
-    "request": "^2.79.0",
+    "meshblu-config": "^7.0.0",
+    "meshblu-http": "^9.8.0",
+    "request": "^2.81.0",
     "server-destroy": "^1.0.1",
     "sigterm-handler": "^2.0.0"
   },

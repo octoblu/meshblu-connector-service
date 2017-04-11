@@ -14,6 +14,7 @@ class MeshbluConnectorController
   create: (request, response) =>
     { owner } = request.params
     { meshbluAuth, body } = request
+    return response.status(403).send({ error: 'Forbidden' }) unless meshbluAuth?
     @createConnectorService.do { body, meshbluAuth, owner }, (error, device) =>
       return response.sendError(error) if error?
       response.status(201).send(device)
@@ -36,6 +37,7 @@ class MeshbluConnectorController
   generateOtp: (request, response) =>
     { meshbluAuth } = request
     { uuid } = request.params
+    return response.status(403).send({ error: 'Forbidden' }) unless meshbluAuth?
     @otpService.generate { uuid, meshbluAuth }, (error, result) =>
       return response.sendError(error) if error?
       response.status(201).send(result)
@@ -50,6 +52,7 @@ class MeshbluConnectorController
   upgrade: (request, response) =>
     { meshbluAuth, body } = request
     { owner, uuid } = request.params
+    return response.status(403).send({ error: 'Forbidden' }) unless meshbluAuth?
     @upgradeConnectorService.do { body, meshbluAuth, uuid, owner }, (error) =>
       return response.sendError(error) if error?
       response.sendStatus(204)
