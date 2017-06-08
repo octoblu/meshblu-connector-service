@@ -2,10 +2,20 @@
 {expect}      = require 'chai'
 shmock        = require '@octoblu/shmock'
 request       = require 'request'
+Redis         = require 'ioredis'
+uuid          = require 'uuid'
 enableDestroy = require 'server-destroy'
 Server        = require '../../src/server'
 
 describe 'Generate Otp', ->
+  beforeEach (done) ->
+    @redisKeyPrefix = "#{uuid.v1()}:"
+    @redis = new Redis 'localhost', {
+      keyPrefix: @redisKeyPrefix
+      dropBufferSupport: true
+    }
+    @redis.on 'ready', done
+
   beforeEach (done) ->
     @meshblu = shmock 0xd00d
     enableDestroy @meshblu
@@ -21,6 +31,8 @@ describe 'Generate Otp', ->
       githubApiUrl: "http://localhost:#{0xdead}"
       meshbluOtpUrl: "http://localhost:#{0xbabe}"
       githubToken: 'some-github-token'
+      redisUri: 'localhost'
+      redisKeyPrefix: @redisKeyPrefix
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'

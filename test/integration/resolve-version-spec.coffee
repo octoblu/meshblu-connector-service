@@ -1,12 +1,22 @@
 {describe,beforeEach,afterEach,it} = global
-{expect}      = require 'chai'
-sinon         = require 'sinon'
+{expect}       = require 'chai'
+sinon          = require 'sinon'
 shmock         = require '@octoblu/shmock'
 request        = require 'request'
+Redis          = require 'ioredis'
+uuid           = require 'uuid'
 enableDestroy  = require 'server-destroy'
 Server         = require '../../src/server'
 
 describe 'Resolve Version', ->
+  beforeEach (done) ->
+    @redisKeyPrefix = "#{uuid.v1()}:"
+    @redis = new Redis 'localhost', {
+      keyPrefix: @redisKeyPrefix
+      dropBufferSupport: true
+    }
+    @redis.on 'ready', done
+
   beforeEach (done) ->
     @meshblu = shmock 0xd00d
     enableDestroy @meshblu
@@ -23,6 +33,8 @@ describe 'Resolve Version', ->
       githubApiUrl: "http://localhost:#{0xdead}"
       githubToken: 'some-github-token'
       meshbluOtpUrl: 'some-otp-url'
+      redisUri: 'localhost'
+      redisKeyPrefix: @redisKeyPrefix
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'
@@ -67,6 +79,48 @@ describe 'Resolve Version', ->
       it 'should have the schemas in the response', ->
         expect(@body).to.deep.equal { version: 'v1.0.0' }
 
+      it 'should have the cache', (done) ->
+        requestId = "http://localhost:#{0xdead}/repos/some-owner/some-meshblu-connector/releases"
+        @redis.get "cache:url:#{requestId}", (error, result) =>
+          return done error if error?
+          expect(result).to.exist
+          done()
+        return # redis fix
+
+      describe 'when getting a specific version again', ->
+        beforeEach (done) ->
+          @resolveVersion = @githubService
+            .get '/repos/some-owner/some-meshblu-connector/releases'
+            .set 'Authorization', 'token some-github-token'
+            .reply 200, [
+              { tag_name: 'v1.0.0' }
+            ]
+
+          options =
+            uri: '/releases/some-owner/some-meshblu-connector/v1.0.0/version/resolve'
+            baseUrl: "http://localhost:#{@serverPort}"
+            json: true
+
+          request.get options, (error, @response, @body) =>
+            done error
+
+        it 'should not resolve the version', ->
+          expect(@resolveVersion.isDone).to.be.false
+
+        it 'should return a 200', ->
+          expect(@response.statusCode).to.equal 200, @body
+
+        it 'should have the schemas in the response', ->
+          expect(@body).to.deep.equal { version: 'v1.0.0' }
+
+        it 'should still have the cache', (done) ->
+          requestId = "http://localhost:#{0xdead}/repos/some-owner/some-meshblu-connector/releases"
+          @redis.get "cache:url:#{requestId}", (error, result) =>
+            return done error if error?
+            expect(result).to.exist
+            done()
+          return # redis fix
+
     describe 'when getting latest', ->
       beforeEach (done) ->
         @resolveVersion = @githubService
@@ -92,6 +146,48 @@ describe 'Resolve Version', ->
 
       it 'should have the schemas in the response', ->
         expect(@body).to.deep.equal { version: 'v2.0.0' }
+
+      it 'should have the cache', (done) ->
+        requestId = "http://localhost:#{0xdead}/repos/some-owner/some-meshblu-connector/releases/latest"
+        @redis.get "cache:url:#{requestId}", (error, result) =>
+          return done error if error?
+          expect(result).to.exist
+          done()
+        return # redis fix
+
+      describe 'when getting latest again', ->
+        beforeEach (done) ->
+          @resolveVersion = @githubService
+            .get "/repos/some-owner/some-meshblu-connector/releases/latest"
+            .set 'Authorization', 'token some-github-token'
+            .reply 200, {
+              tag_name: 'v2.0.0'
+            }
+
+          options =
+            uri: '/releases/some-owner/some-meshblu-connector/latest/version/resolve'
+            baseUrl: "http://localhost:#{@serverPort}"
+            json: true
+
+          request.get options, (error, @response, @body) =>
+            done error
+
+        it 'should not resolve the version', ->
+          expect(@resolveVersion.isDone).to.be.false
+
+        it 'should return a 200', ->
+          expect(@response.statusCode).to.equal 200, @body
+
+        it 'should have the schemas in the response', ->
+          expect(@body).to.deep.equal { version: 'v2.0.0' }
+
+        it 'should still have the cache', (done) ->
+          requestId = "http://localhost:#{0xdead}/repos/some-owner/some-meshblu-connector/releases/latest"
+          @redis.get "cache:url:#{requestId}", (error, result) =>
+            return done error if error?
+            expect(result).to.exist
+            done()
+          return # redis fix
 
     describe 'when the version does not exist', ->
       beforeEach (done) ->

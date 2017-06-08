@@ -12,6 +12,7 @@ class Command
       GITHUB_API_URL: envalid.url({ default: 'https://api.github.com' })
       MESHBLU_Otp_URL: envalid.url({ default: 'https://meshblu-otp.octoblu.com' })
       GITHUB_TOKEN: envalid.str()
+      REDIS_URI: envalid.str({ devDefault: 'localhost' })
     }
 
   panic: (error) =>
@@ -27,6 +28,7 @@ class Command
       githubApiUrl      : @env.GITHUB_API_URL
       githubToken       : @env.GITHUB_TOKEN
       meshbluOtpUrl     : @env.MESHBLU_Otp_URL
+      redisUri          : @env.REDIS_URI
     }
     server.run (error) =>
       return @panic error if error?

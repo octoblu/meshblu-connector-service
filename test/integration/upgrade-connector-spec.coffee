@@ -3,10 +3,20 @@
 sinon         = require 'sinon'
 shmock        = require '@octoblu/shmock'
 request       = require 'request'
+Redis         = require 'ioredis'
+uuid          = require 'uuid'
 enableDestroy = require 'server-destroy'
 Server        = require '../../src/server'
 
 describe 'Upgrade Connector', ->
+  beforeEach (done) ->
+    @redisKeyPrefix = "#{uuid.v1()}:"
+    @redis = new Redis 'localhost', {
+      keyPrefix: @redisKeyPrefix
+      dropBufferSupport: true
+    }
+    @redis.on 'ready', done
+
   beforeEach (done) ->
     @meshblu = shmock 0xd00d
     enableDestroy @meshblu
@@ -24,6 +34,8 @@ describe 'Upgrade Connector', ->
       githubApiUrl: "http://localhost:#{0xdead}"
       githubToken: 'some-github-token'
       meshbluOtpUrl: 'some-otp-url'
+      redisUri: 'localhost'
+      redisKeyPrefix: @redisKeyPrefix
       meshbluConfig:
         hostname: 'localhost'
         protocol: 'http'

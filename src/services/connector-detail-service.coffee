@@ -1,10 +1,10 @@
 _                  = require 'lodash'
-request            = require 'request'
 
 class ConnectorDetailService
-  constructor: ({ @githubToken, @githubApiUrl }) ->
+  constructor: ({ @githubToken, @githubApiUrl, @cachedRequest }) ->
     throw new Error 'ConnectorDetailService: requires githubToken' unless @githubToken?
     throw new Error 'ConnectorDetailService: requires githubApiUrl' unless @githubApiUrl?
+    throw new Error 'ConnectorDetailService: requires cachedRequest' unless @cachedRequest?
 
   resolveVersion: ({ githubSlug, version }, callback) =>
     return callback @_createError('Invalid type for version', 422) if version? and !_.isString(version)
@@ -21,12 +21,13 @@ class ConnectorDetailService
         'Authorization': "token #{@githubToken}"
       json: true
 
-    request.get options, (error, response, latest) =>
-      return callback @_createError error.message, 500 if error?
-      return callback @_createError latest.message, response.statusCode if response.statusCode > 299
+    requestId = "#{@githubApiUrl}/repos/#{githubSlug}/releases/latest"
+
+    @cachedRequest.get requestId, options, (error, latest) =>
+      return callback @_createError error.message, error.code if error?
       version = latest?.tag_name
       return callback @_createError('No latest version available', 404) unless version?
-      return callback null, latest?.tag_name
+      callback null, version
 
   _get: ({ githubSlug, version }, callback) =>
     options =
@@ -37,9 +38,9 @@ class ConnectorDetailService
         'Authorization': "token #{@githubToken}"
       json: true
 
-    request.get options, (error, response, releases) =>
-      return callback @_createError error.message, 500 if error?
-      return callback @_createError releases.message, response.statusCode if response.statusCode > 299
+    requestId = "#{@githubApiUrl}/repos/#{githubSlug}/releases"
+    @cachedRequest.get requestId, options, (error, releases) =>
+      return callback @_createError error.message, error.code if error?
       release = _.find releases, { tag_name: version }
       @_validateRelease release, callback
 
@@ -50,7 +51,7 @@ class ConnectorDetailService
     return callback @_createError("#{version} (draft) is invalid", 406) if draft
     callback null, version
 
-  _createError: (message, code) =>
+  _createError: (message, code=500) =>
     error = new Error message
     error.code = code if code?
     return error

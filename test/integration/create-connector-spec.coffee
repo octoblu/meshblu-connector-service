@@ -3,10 +3,20 @@
 sinon         = require 'sinon'
 shmock        = require '@octoblu/shmock'
 request       = require 'request'
+Redis         = require 'ioredis'
+uuid          = require 'uuid'
 enableDestroy = require 'server-destroy'
 Server        = require '../../src/server'
 
 describe 'Create Connector', ->
+  beforeEach (done) ->
+    @redisKeyPrefix = "#{uuid.v1()}:"
+    @redis = new Redis 'localhost', {
+      keyPrefix: @redisKeyPrefix
+      dropBufferSupport: true
+    }
+    @redis.on 'ready', done
+
   beforeEach (done) ->
     @meshblu = shmock 0xd00d
     enableDestroy @meshblu
@@ -22,6 +32,8 @@ describe 'Create Connector', ->
       port: undefined,
       disableLogging: true
       logFn: @logFn
+      redisUri: 'localhost'
+      redisKeyPrefix: @redisKeyPrefix
       fileDownloaderUrl: "http://localhost:#{0xbabe}"
       githubApiUrl: "http://localhost:#{0xdead}"
       githubToken: 'some-github-token'

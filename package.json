@@ -1,6 +1,6 @@
 {
   "name": "meshblu-connector-service",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "meshblu-connector-service an Octoblu Service",
   "keywords": [
     "Octoblu",
@@ -26,29 +26,34 @@
   },
   "devDependencies": {
     "@octoblu/shmock": "^0.9.1",
-    "chai": "^3.5.0",
+    "chai": "^4.0.2",
     "chai-subset": "^1.5.0",
     "env-test": "^1.0.0",
     "mocha": "^3.0.2",
-    "mocha-multi": "^0.10.0",
+    "mocha-multi": "^0.11.0",
     "mocha-osx-reporter": "^0.1.2",
-    "nyc": "^10.2.0",
+    "nyc": "^11.0.2",
     "sinon": "^2.1.0",
-    "sinon-chai": "^2.9.0"
+    "sinon-chai": "^2.9.0",
+    "uuid": "^3.0.1"
   },
   "dependencies": {
     "coffee-script": "^1.12.5",
     "debug": "^2.6.3",
-    "envalid": "^2.4.2",
+    "envalid": "^3.0.0",
     "express-meshblu-auth": "^9.1.0",
     "express-octoblu": "^3.0.1",
+    "ioredis": "^3.1.1",
     "json-schema-defaults": "^0.3.0",
     "lodash": "^4.17.4",
-    "meshblu-config": "^7.0.0",
-    "meshblu-http": "^9.8.0",
+    "meshblu-config": "^8.0.1",
+    "meshblu-http": "^10.0.4",
     "request": "^2.81.0",
     "server-destroy": "^1.0.1",
     "sigterm-handler": "^2.0.0"
+  },
+  "optionalDependencies": {
+    "hiredis": "^0.5.0"
   },
   "license": "MIT",
   "nyc": {
