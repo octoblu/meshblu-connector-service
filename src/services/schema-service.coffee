@@ -14,7 +14,8 @@ class SchemaService
       json: true
     }, (error, response, body) =>
       return callback error if error?
-      return callback @_createError('Invalid fetch schema response', response.statusCode) if response.statusCode > 399
+      return callback null, {} if response.statusCode > 399
+      # return callback @_createError('Invalid fetch schema response', response.statusCode) if response.statusCode > 399
       callback null, _.get(body, 'schemas', {})
 
   defaultOptions: ({ schemas }) =>

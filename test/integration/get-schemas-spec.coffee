@@ -168,5 +168,5 @@ describe 'Get Schemas', ->
       it 'should get the schema', ->
         @getSchemas.done()
 
-      it 'should return a 404', ->
-        expect(@response.statusCode).to.equal 404, @body
+      it 'should return a 200', ->
+        expect(@response.statusCode).to.equal 200, @body
