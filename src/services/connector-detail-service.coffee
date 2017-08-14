@@ -32,7 +32,7 @@ class ConnectorDetailService
   _get: ({ githubSlug, version }, callback) =>
     options =
       baseUrl: @githubApiUrl
-      uri: "/repos/#{githubSlug}/releases"
+      uri: "/repos/#{githubSlug}/releases?per_page=100"
       headers:
         'User-Agent': 'Meshblu Connector Service'
         'Authorization': "token #{@githubToken}"
@@ -46,7 +46,7 @@ class ConnectorDetailService
 
   _validateRelease: ({ tag_name, prerelease, draft } = {}, callback) =>
     version = tag_name
-    return callback @_createError("#{version} is does not exist", 404) unless version?
+    return callback @_createError("#{version} does not exist", 404) unless version?
     return callback @_createError("#{version} (prerelease) is invalid", 406) if prerelease
     return callback @_createError("#{version} (draft) is invalid", 406) if draft
     callback null, version
